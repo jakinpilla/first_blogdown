@@ -1,0 +1,2 @@
+"0","adult_logistic_m <- glm(wage ~ ., data = train_data_1, family = binomial)"
+"2","glm.fit: 적합된 확률값들이 0 또는 1 입니다"

@@ -1,0 +1,2 @@
+"0","pred_logistic <- prediction(yhat_logistic, y_obs)"
+"0","perf_logistic <- performance(pred_logistic, measure = ""tpr"", x.measure = ""fpr"")"

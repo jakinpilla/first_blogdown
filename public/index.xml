@@ -6,10 +6,19 @@
     <description>Recent content on My DataScience Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 05 May 2016 21:48:51 -0700</lastBuildDate>
+    <lastBuildDate>Thu, 30 Apr 2020 21:48:51 -0700</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Me and blog</title>
+      <link>/about/</link>
+      <pubDate>Thu, 30 Apr 2020 21:48:51 -0700</pubDate>
+      
+      <guid>/about/</guid>
+      <description>I&amp;rsquo;m a data-scientist. I made this blog for my DS study. This is a data-science blog using the blogdown package.</description>
+    </item>
     
     <item>
       <title>Adult Census Income Dataset EDA 1 (Part1)</title>
@@ -32,6 +41,16 @@ adult &amp;lt;- read_csv(&amp;#39;https://raw.githubusercontent.com/jakinpilla/f
     </item>
     
     <item>
+      <title>Logistic Regression 예제: Adult Dataset</title>
+      <link>/2020/04/30/logistic-regression-%EC%98%88%EC%A0%9C-adult-dataset/</link>
+      <pubDate>Thu, 30 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/04/30/logistic-regression-%EC%98%88%EC%A0%9C-adult-dataset/</guid>
+      <description>Data Loading &amp;amp; SplitingData Loading 먼저 데이터를 불러오겠습니다. 지난 번 포스트에서 전처리한 데이터를 사용합니다. 그 데이터는 adult_1.csv 파일에 저장되어 있습니다.
+adult &amp;lt;- read_csv(&amp;#39;https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv&amp;#39;)# adult &amp;lt;- read_csv(&amp;#39;./data/adult_1.csv&amp;#39;)adult %&amp;gt;% glimpse()## Observations: 32,561## Variables: 13## $ age &amp;lt;dbl&amp;gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...## $ workclass &amp;lt;chr&amp;gt; &amp;quot;State-gov&amp;quot;, &amp;quot;Self-emp-not-inc&amp;quot;, &amp;quot;Private&amp;quot;, &amp;quot;Private...## $ education_num &amp;lt;dbl&amp;gt; 13, 13, 9, 7, 13, 14, 5, 9, 14, 13, 10, 13, 13, 12, .</description>
+    </item>
+    
+    <item>
       <title>로지스틱 회귀(Logistic Regression) 모형의 평가: 로그우도, 이탈도 등</title>
       <link>/2020/04/30/%EB%A1%9C%EC%A7%80%EC%8A%A4%ED%8B%B1-%ED%9A%8C%EA%B7%80logistic-regression-%EB%AA%A8%ED%98%95%EC%9D%98-%ED%8F%89%EA%B0%80-%EB%A1%9C%EA%B7%B8%EC%9A%B0%EB%8F%84-%EC%9D%B4%ED%83%88%EB%8F%84-%EB%93%B1/</link>
       <pubDate>Thu, 30 Apr 2020 00:00:00 +0000</pubDate>
@@ -50,15 +69,6 @@ adult &amp;lt;- read_csv(&amp;#39;https://raw.githubusercontent.com/jakinpilla/f
       <guid>/2020/04/23/%EB%A1%9C%EC%A7%80%EC%8A%A4%ED%8B%B1-%ED%9A%8C%EA%B7%80logistic-regression%EC%9D%98-%EA%B8%B0%EB%B3%B8-%EC%9B%90%EB%A6%AC/</guid>
       <description>로지스틱 회귀란? 로지스틱 회귀는 결과변수가 범주형 변수이고 예측변수들이 연속변수 또는 범주형 변수인 회귀분석 모형입니다. 보통 머신러닝에서 분류(Classification)을 위해 가장 기본이 되는 모형으로 사용됩니다. 이 때 결과변수가 두 가지일(0 &amp;amp; 1, False &amp;amp; True, Neg &amp;amp; Pos 등) 경우 Binary Logistic Regression라 하고, 결과변수가 셋 이상일 경우 Multinomial Logistic Regression 이라고 합니다.
 로지스틱 회귀의 원리 예측변수가 \(X_{1i}\) 하나 뿐인 가장 단순한 경우에, Y가 1이 될(혹은 True, Pos 등, 상대적으로 관심이 있어 예측을 하고 싶은 대상을 1로 둡니다.</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>/about/</link>
-      <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
-      
-      <guid>/about/</guid>
-      <description>This is a &amp;ldquo;hello world&amp;rdquo; example website for the blogdown package. The theme was forked from @jrutheiser/hugo-lithium-theme and modified by Yihui Xie.</description>
     </item>
     
   </channel>
