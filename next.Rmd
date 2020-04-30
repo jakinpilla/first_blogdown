@@ -1,0 +1,445 @@
+---
+title: "residue"
+author: "Daniel_Kim"
+date: '2020 4 26 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+- 기저모형의 매개변수는 항상 하나이다. 따라서, 이후의 새 모형들의 자유도는 항상 예측변수 개수에 1을 더한 값이다.
+
+### 모형의 평가: $R$과 $R^{2}$
+
+- 로지스틱 회귀에도 다중회귀의 $R$과 좀 더 직접적으로 대응되는 통계량이 있다. 바로 R 통계량(R-statistic)이다.
+
+- 이 R 통계량은 결과변수와 각 예측변수 사이의 편상관계수로, 그 값은 -1에서 1까지이다.
+
+- R 통계량의 값이 양수이면 예측변수의 값이 증가함에 따라 결과의 발생 가능도도 증가한다는 뜻이고, 값이 음수이면 예측변수의 값이 증가함에 따라 결과의 발생 가능도도 증가한다는 뜻이다.
+
+- R 통계량의 크기가 작다는 것은그 변수가 모형에 조금만 기여한다는 뜻이다.
+
+$$R = \sqrt \frac{z^{2} - 2df}{-2LL}$$
+
+- $z^{2}$은 왈드 통계량(Wald Statistic)이다. 
+- R 값은 왈드 통계량에 의존하므로, 정확한 측도는 절대 아니다. 그리고 이 값의 제곱을 선형회귀에서처럼 해석하는 것은 유효하지 않다.
+- 로지스틱 회귀에서 선형회귀의 $R^{2}$에 해당하는 좋은 측도 중 하나는 **호스머-렘쇼 측도**가 있다.
+
+$$R^{2}_{L} = \frac{-2LL(모형)}{-2LL(기저모형)}$$
+
+$$R^{2}_{L} = \frac{-2LL(기저모형) - 2LL(새모형)}{-2LL(기저모형)}$$
+
+- 콕스-스넬 $R^{2}_{CS}$
+
+$$R^{2}_{CS} = 1 - exp \left( \frac{(-2LL(새모형) - (-2LL(기저모형))}{n} \right)$$
+
+ - 네이글커크의 $R^{2}_{N}$
+
+$$R^{2}_{N} = \frac{R^{2}_{CS}}{1 - exp \left( -\frac{-2LL(기저모형)}{n} \right)}$$
+
+
+### 모형의 평가: 정보기준
+
+- 아카이케 정보기준(AIC)
+
+$$AIC = -2LL + 2k$$
+
+- 베이즈 정보기준(BIC)
+
+$$BIC = -2LL + 2k \times log(n)$$
+
+### 예측변수의 기여도 평가: z 통계량
+
+- 로지스틱 회귀에서도 개별 예측변수의 기여도도 측정할 필요가 있다. 선형회귀에서는 추정된 회귀계수(b)와 그 표준오차를 이용해서 $t$ 통계량을 계산했다. 로지스틱 회귀에서도 그에 대응되는 통계량이 있는데, 바로 z 통계량이다.(z-statistic)
+
+$$z = \frac{b}{SE_{b}}$$
+
+- z 통계량은 그냥 회귀계수를 자신의 표준오차로 나눈 것이다. 
+- z 통계량을 사용할 때는 조금 조심해야 하는데, 왜냐하면 회귀계수가 클 때는 표준오차가 상승(inflation)해서 z 통계량이 과소평가될 수 있기 때문이다.
+
+### 승산비
+
+- odds: 승산, 그 사건이 발생할 확률을 그 사건이 발생하지 않을 확률로 나눈 것
+- odds ratio: 승산비, 변경 후의 승산을 변경 전의 승산으로 나눈 것
+
+$$odds = \frac{P(사건)}{P(사건없음)}$$
+
+$$P(사건 Y) = \frac{1}{1 + e^{-(b_{0} + b_{1}X_{1i})}}$$
+
+$$P(사건없음) = 1 - P(사건 Y)$$
+
+- 예측변수를 1단위 변경하기 전과 후의 승산들을 구하고 둘의 변화 비율을 계산하면 승산비를 구할 수 있다.
+
+$$\Delta 승산 = \frac{예측변수의 \ 1단위 \ 변경 \ 이후의 \ 승산}{원래의 \ 승산}$$
+
+### 여러 로지스틱 회귀 방법
+
+#### 강제도입법
+
+#### 단계적 방법
+
+- 전진, 후진, 전후진 및 후전진 방법 등이 있다. 
+
+#### 방법의 선택
+
+ - 후진 방향의 변수 제거에 비해 전진 방향의 변수 선택은 억제인자 효과와 관련된 예측변수를 배제할 가능성이 크다. 따라서 전진 방향의 단계적 방법에서는 제2종오류(즉, 실제로 결과변수를 예측하는 예측변수를 빼먹는 오류)를 범할 위험이 크다.
+ 
+ 
+## 가정과 잠재적 문제점
+ 
+### 가정
+ 
+ - 1. 선형성: 임의의 연속 예측변수들과 결과변수의 로짓 관계가 선형이어야 한다.
+ 
+ $$\log(\frac{\mu}{1 - \mu}) = \eta(x)  = x\beta$$
+ 
+ - 2. 오차의 독립성: 사례들 사이에 관계가 없어야 한다.
+ 
+ - 3. 다중공선성 부재: VIF 통계량, 비례 비중심화 외적 행렬(scaled, uncentered cross-products matrix)의 고유값들, 분산비율의 조건 지수들로 확인
+ 
+### faiilure to converge에 관한 R 메세지
+
+- 반복과정을 통해 통계적 절차를 수행할 때 최대 반복 횟수가 되었어도 값이 수렴되지 않았다는 뜻이다. 이런 메세지가 나왔다면 R이 출력한 모든 결과를 무시해야 한다.
+
+### 예측변수로부터의 불완전 정보
+
+| 담배를 피우는가? | 토마토를 먹는가? | 암에 걸렸는가? |
+|:----:|:----:|:----:|
+| 예 | 아니오 | 예 |
+| 예 | 예 | 예 |
+| 아니요 | 아니요 | 예 |
+| 아니요 | 예 | ????? |
+
+- 이러한 문제는 교차표를 이용해서 점검해 보아야 한다. 표의 각 칸에 있는 기대 도수들도 살펴볼 필요가 있다. 그 도수들이 모두 1보다 큰지, 그리고 5 미만인 도수가 20%는 넘는지 확인해야 한다.(로지스틱 회귀의 적합성 검정이 그러한 가정을 깔고 있기 때문이다.)
+
+### 완전 분리
+
+- 로지스틱 회귀가 실패로 끝나는 또 다른 상황은 한 변수 또는 변수들의 한 조합이 결과변수를 완벽하게 예측할 때이다.
+
+- 세로축이 0인 삼각형과 1인 삼각형들이 있는데 삼각형들의 범위가 겹치지 않는다. 도둑만큼 무서운 고양이가 없는 것이다. 이러한 상황을 완전분리(complete separation)이라고 한다.
+
+- 표본에 15kb과 40kg 사이의 자료가 없으므로, 그 범위의 체중에 대한 확률을 구할 수 없다. R은 이 중간지점에 대한 기울기를 최선을 다해 추측하려 하는데, 그 과정에서 근사값들이 무한대를 향해 발산하는 불안정한 상황이 발생할 수 있다.(즉, 표준오차가 그렇게 크게 나타는 것이다.)
+
+## 이번 장에서 사용하는 패키지들
+
+- car, mlogit
+
+## 이항 로지스틱 회귀: 미끈미끈한 예제 하나
+
+- 항문, 뱀장어
+
+###  자료준비
+
+```{r}
+eelData <- read.delim('eel.dat', header = T)
+```
+
+```{r}
+head(eelData)
+```
+
+
+```{r}
+eelData$Cured <-relevel(eelData$Cured, 'Not Cured')
+eelData$Intervention <- relevel(eelData$Intervention, 'No Treatment')
+```
+
+```{r}
+eelData %>% str()
+```
+
+### R을 이용한 기본적인 로지스틱 회귀분석
+
+- glm()
+- family 인수에는 분포의 종류(가우스, 이항, 푸아송, 감마 등)를 나타내는 객체를 지정
+- na.action
+- Binomial(link = 'logit')과 Binomial(link = 'probit')
+
+```{r}
+eelmodel_1 <- glm(Cured ~ Intervention, data = eelData, family = binomial())
+```
+
+```{r}
+eelmodel_2 <- glm(Cured ~ Intervention + Duration, data = eelData, family = binomial())
+```
+
+```{r}
+eelmodel_1 %>% summary()
+```
+
+
+- Null deviance: 154.08  on 112  degrees of freedom
+- Residual deviance: 144.16  on 111  degrees of freedom
+- 이 이탈도가 클수록 통계적 모형으로서의 이 회귀모형은 자료에 잘 적합하지 않는 것이다.
+- 귀무 이탈도(Null deviance)는 상수만 있고 예측변수는 전혀 없는 모형의 이탈도이다. 즉, -2LL(기저모형)이 바로 귀무 이탈도이다.
+- 잔차 이탈도는 모형의 이탈도, 즉 -2LL이다.
+- 기저 모형의 이탈도는 154.08이지만 거기에 Intervention을 추가하니 이탈로가 144.16으로 감소했다. 이후의 모델이 결과를 좀 더 잘 예측한다.
+- 귀무 이탈도에서 이탈도를 뺀 것이 바로 모형의 개선 정도를 뜻하는 카이제곱 통계량이다.
+
+```{r}
+modelChi <- eelmodel_1$null.deviance - eelmodel_2$deviance
+modelChi
+```
+
+- 귀무 모형의 자유도에서 eelmodel_1 모형의 자유도를 빼면 앞에서 구한 카이제곱 통계량의 자유도가 된다.
+```{r}
+chidf <- eelmodel_1$df.null - eelmodel_1$df.residual
+chidf
+```
+
+- pchisq()
+-우리가 원하는 확률은 1에서 $pchisq()$ 함수의 결과를 뺀 것이다.
+
+```{r}
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+chisq.prob
+```
+
+- 따라서, 모형에 Intervention을 포함함으로써 모형의 적합도가 $\chi^{2} = 9.93, p = .002$로 유의하게 개선되었다는 결론을 내릴 수 있다.
+
+- Intervention  1.22879(Estimate) 0.3998(Error) 3.074(z value) 0.00212(Pr) 
+- $b$값은 예측변수의 1단위 변화에 따른 결과의 로짓의 변화량을 나타낸다. 결과의 로짓이란 그냥 해당 Y값이 나올 승산의 자연로그이다. 
+- $b=1.23, z=3.07,p<.002$ z 통계량의 유의확률이 .05미만이므로 Intervention은 치료 여부의 유의한 예측변수라고 할 수 있다.
+- 로지스틱 회귀의 R
+
+$$R = \sqrt \frac{3.074^2 - 2 \times1}{154.08} = .22$$
+
+- $R^{2}_{L}$: 호스머-램쇼
+
+```{r}
+R2.hl <- modelChi / eelmodel_1$null.deviance
+R2.hl
+```
+
+- 콕스-스넬 $R^{2}_{CS}$
+
+```{r}
+R.cs <- 1 - exp((eelmodel_1$deviance - eelmodel_1$null.deviance) / 113)
+R.cs
+```
+
+- 네이글커크의 $R^{2}_{N}$
+```{r}
+R.n <- R.cs/(1 - exp( - (eelmodel_1$null.deviance / 113)))
+R.n
+```
+
+```{r}
+logisticPseudoR2s <- function(LogModel) {
+  dev <- LogModel$deviance
+  nullDev <- LogModel$null.deviance
+  modelN <- length(LogModel$fitted.values)
+  R.l <- 1 - dev / nullDev
+  R.cs <- 1 - exp( -(nullDev - dev) / modelN)
+  R.n <- R.cs / (1 - (exp( - (nullDev / modelN))))
+  
+  cat('Pseudo R^2 for logistic regression\n')
+  cat('Hosmer and Lemeshow R^2 ', round(R.l, 3), '\n')
+  cat('Cox and Shell R^2', round(R.cs, 3), '\n')
+  cat('Nagekkerke R^2', round(R.n, 3), '\n')
+}
+
+logisticPseudoR2s(eelmodel_1)
+```
+
+```{r}
+model.display <- logistic.display(eelmodel_1)
+model.table <- model.display$table[rownames(model.display$table)!="", ]
+kable(model.table, caption = model.display$first.line)
+```
+
+- `X = 0` 일때의 승산
+
+```{r}
+p_cured <- 1/(1 + exp(-(-.288 + 1.229*0)))
+p_cured
+```
+
+```{r}
+p_not_cured <- 1 - p_cured
+p_not_cured
+```
+
+```{r}
+odds <- p_cured/p_not_cured
+odds
+```
+
+
+- `X = 1` 일때의 승산
+
+```{r}
+p_cured_1 <- 1/(1 + exp(-(-.288 + 1.229*1))); p_cured_1
+```
+
+```{r}
+p_not_cured_1 <- 1 - p_cured_1; p_not_cured_1
+```
+
+```{r}
+odds_1 <- p_cured_1 / p_not_cured_1; odds_1
+```
+ 
+ - 이렇게 예측변수의 1단위 변경 이전(`odds`)과 이후(`odds_1`)의 승산들이 나왔다. 이제 예측변수의  1단위 변경 이후의 승산을 이전의 승산으로 나누어 승산비를 구한다.
+ 
+```{r}
+odds_ratio <- odds_1/odds; odds_ratio # exp(1.2287) 의 값이 3.41781임에 유의
+```
+ 
+또한, 예측변수의 b 계수의 지수함수로서의 승산비도 계산해보자. 
+
+```{r}
+eelmodel_1$coefficients %>% exp()
+```
+
+ \ 위에서 직접 계산한 승산비와 이 값은 서로 동일하다(반올림을 고려할 때). 이 값이 1보다 크다는 것은 예측변수가 증가하면 결과가 발생할 승산도 증가한다는 뜻이다.반대로 1보다 작으면 결과가 발생할 승산이 감소한다는 뜻이다.
+
+ \ 이 예에서는 처치를 받은 환자가 치료될 승산이 처치를 받지 않은 환자가 치료될 승산의 3.42배라고 말할 수 있다. 
+
+ \ 승산비들의 신뢰구간을 구해보자. 
+
+```{r}
+exp(confint(eelmodel_1))
+```
+ 
+\ 이 결과에서 중요한 것은 예측변수 승산비의 신뢰구간에 1이 포함되지 않는다는 점이다. 신뢰구간의 상계와 하계가 모두 1보다 크므로 모집단에서의 관계의 방향이 관측된 관계의 방향과 같다고 확신할 수 있다.(하계가 1보다 작다면 확신할 수 없다.)
+
+### 8.6.6 모형2: Intervention과 Duration 변수로 예측
+
+
+```{r}
+eelmodel_2 %>% summary()
+```
+
+ \ Duration의 b값은 꽤 작은 값인 -0.007835이고 확률은 .964로 > .05이므로 유의하지 않다.
+ 
+ \ 모형 1과 모형 2를 비교해 보면, 두 모형의 이탈도가 같다.(144.16) 이는 모형 2가 모형 1보다 그리 크게 개선되지는 않았음을 뜻한다.
+ 
+ \ `anova()` 함수를 이용해 모형들의 차이를 계산해보자. `anova()` 함수는 자유도는 계산해주지만 유의확률까지 계산해 주지는 않는다. 
+ 
+```{r}
+anova(eelmodel_1, eelmodel_2)
+```
+ 
+  \ 두 모형의 이탈도 차이, 자유도 차이 및 유의확률을 직접 계산을 통해 구해보자.
+  
+```{r}
+modelChi <- eelmodel_1$deviance - eelmodel_2$deviance
+chidf <- eelmodel_1$df.residual - eelmodel_2$df.residual
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+
+modelChi; chidf; chisq.prob
+```
+ \ 두 모형의 이탈도 차이는 0.001983528이고 자유도 차이는 1이다. p 값은 0.9644765인데 >.05이므로 유의하지 않다.
+ 
+### 핵심정리
+
+- 최종 모형의 전반적인 적합도는 이탈도 통계량과 그와 연관된 카이제곱 통계량으로 평가할 수 있다. 카이제곱 통계량의 유의확률이 .05보다 작으면 그 모형은 자료에 유의한 수준으로 잘 적합하는 것이다.
+
+ - 승산비를 통해 모델을 해석한다. `exp(model$coefficients)` 형태의 명령으로 구할 수 있다. 승산비가 1보다 크다는 것은 예측변수가 증가하면 결과가 발생할 승산도 증가한다는 뜻이다. 반대로, 승산비가 1보다 작다는 것은 예측변수가 증가하면 결과가 발생할 승산이 감소한다는 것이다. 이러한 해석에 신뢰성이 있으려면 승산비의 신뢰구간에 1이 포함되어서는 안 된다. 
+ 
+### 로지스틱 회귀의 사례별 진단
+
+#### 잔차 구하기
+
+\ `resid()` 함수를 이용해 로지스틱 회귀 모델의 잔차를 구한다. 
+
+ \ `fitted()` 함수를 이용해  로지스틱 회귀의 적합값을 구한다.  이 적합값은 선형회귀의 값과 의미가 다른데, 각 예측변수 값이 주어졌을 때 해당 Y값이 발생할 확률을 예측한 값이다. 
+
+$$P(Y) = \frac{1}{1 + exp(-(b_{0} + b_{1}X_{1i} + b_{2}X_{2i} + ... + b_{n}X_{n}))}$$
+
+\ 또한, 예측된 그룹 소속도(predicted group membership)를 회귀모형과 각 참가자에 대한 가장 가능도 높은 결과에 기초해서 계산할 수도 있다. 
+
+
+ \ 이 값들을 담은 변수들을 데이터 데이터프레임에 추가하고 여러 검정을 수행할 수 있다.
+
+```{r}
+eelData$predicted.prob <- fitted(eelmodel_1)
+eelData$standized.residuals <- rstandard(eelmodel_1)
+eelData$studentized.residuals <- rstudent(eelmodel_1)
+# eelData$dfbeta <- dfbeta(eelmodel_1)
+eelData$diffit <- dffits(eelmodel_1)
+eelData$leverage <- hatvalues(eelmodel_1)
+```
+
+
+#### 예측된 확률
+
+```{r}
+eelData %>%
+  as_tibble() %>%
+  select(Cured, Intervention, Duration, predicted.prob) 
+```
+
+\ 현재 치료에 대한 유의미한 변수는 `Intervention` 뿐이다.
+
+\ 위의 표를 살펴보면, 환자가 처치를 받지 않았을 때(No Treatment, Intervention = 0) 치료될 확률은 .429이다. 약 43%가 치료된다. 그러나 개입이 있었다면 환자가 치료될 확률은 .719이다. 
+
+#### 잔차의 해석
+
+\ 이 모형이 정말로 좋은 모형인지 확인하려면 잔차들을 조사해야 한다. 그 이유는 다음과 같다.
+ - 모형이 잘 적합하지 않는 자료점들을 격리
+ - 모형에 필요 이상으로 큰 영향을 주는 자료점들을 격리
+
+```{r}
+eelData %>%
+  select(leverage, studentized.residuals)
+```
+
+
+```{r}
+ggplot(eelData, aes(y = studentized.residuals)) +
+  geom_boxplot() + 
+  coord_flip()
+```
+
+\ 스튜던트화 잔차가 $\pm2$ 이내 이므로 괜찮다고 할 수 있다.
+
+```{r}
+ggplot(eelData, aes(y = leverage)) +
+  geom_boxplot() + 
+  coord_flip()
+```
+
+\ 지렛대 통계량이 계산된 기대값인 .018과 아주 가깝다. 
+
+
+$$\frac{k + 1}{N} = \frac{1 + 1}{113} = .018$$
+
+### 핵심정리 
+
+- 표준화잔차들을 살펴보아서 절대값이 2보다 큰 사례들이 전체의 5%를 넘기지 않는지, 절댓값이 2.5보다 큰 사례들이 전체의 약 1%를 넘지는 않는지 확인한다. 절대값이 3보다 큰 사례는 이상치일 수 있다.
+
+- 평균지렛대 값을 계산하고, 지렛대 값이 평균의 2배 또는 3배 이상인 사례들을 찾는다.
+
+- DFBeta의 절대값이 1보다 큰 사례들을 
+
+### 효과크기의 계산
+
+\ 승산비를 효과크기의 측도로 사용하면 된다.
+
+
+## 로지스틱 회귀분석 보고 방법
+
+\ 가능한 결과를 표로 작성한다. 이 때 베타값들과 해당 표준오차 및 유의확률, 그리고 모형에 관한 몇 가지 일반적인 통계량($R^{2}$과 적합도 통계량) 등을 명시하도록 한다. 그 외 승산비들과 그 신뢰구간도 보고하도록 하자.
+
+|  |   B(SE) | 하계 | 승산비 | 상계 |
+|:----:|:----:|:----:|:----:|:----:|
+| 포함된 변수 |    |    |    |    |
+| 상수 | -0.29 (.27) |     |    |    |
+| 개입 | 1.23 (.40) | 1.56 | 3.42 | 7.48 |
+비고, $R^{2} = .06$ (호스머-렘쇼), .08 (콕스-스넬), .11(네이글커크). 모형 $\chi^{2}(1) = 9.93, \ p < .01 *$ 
+
+
+
+
+
+
+
+
+
+
+
+

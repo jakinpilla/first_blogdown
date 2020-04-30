@@ -1,0 +1,389 @@
+---
+title: "Adult Census Income Dataset EDA 2 (Part2)"
+author: "Daniel Kim"
+date: "2020-04-30"
+output: 
+    html_document:
+      toc : true
+      toc_depth : 5
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<div id="data-loading" class="section level2">
+<h2>Data Loading</h2>
+<p> 먼저 데이터를 불러오겠습니다. 지난 번 포스트에서 전처리한 데이터를 사용합니다. 그 데이터는 adult_1.csv 파일에 저장되어 있습니다.</p>
+<pre class="r"><code>adult &lt;- read_csv(&#39;./data/adult_1.csv&#39;)
+adult %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 32,561
+## Variables: 13
+## $ age            &lt;dbl&gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...
+## $ workclass      &lt;chr&gt; &quot;State-gov&quot;, &quot;Self-emp-not-inc&quot;, &quot;Private&quot;, &quot;Private...
+## $ education_num  &lt;dbl&gt; 13, 13, 9, 7, 13, 14, 5, 9, 14, 13, 10, 13, 13, 12, ...
+## $ marital_status &lt;chr&gt; &quot;Never-married&quot;, &quot;Married-civ-spouse&quot;, &quot;Divorced&quot;, &quot;...
+## $ occupation     &lt;chr&gt; &quot;White-Collar&quot;, &quot;White-Collar&quot;, &quot;Blue-Collar&quot;, &quot;Blue...
+## $ relationship   &lt;chr&gt; &quot;Not-in-family&quot;, &quot;Husband&quot;, &quot;Not-in-family&quot;, &quot;Husban...
+## $ race           &lt;chr&gt; &quot;White&quot;, &quot;White&quot;, &quot;White&quot;, &quot;Black&quot;, &quot;Black&quot;, &quot;White&quot;...
+## $ sex            &lt;chr&gt; &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Female&quot;, &quot;Female&quot;, ...
+## $ capital_gain   &lt;dbl&gt; 2174, 0, 0, 0, 0, 0, 0, 0, 14084, 5178, 0, 0, 0, 0, ...
+## $ capital_loss   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+## $ hours_per_week &lt;dbl&gt; 40, 13, 40, 40, 40, 40, 16, 45, 50, 40, 80, 40, 30, ...
+## $ native_country &lt;chr&gt; &quot;United-States&quot;, &quot;United-States&quot;, &quot;United-States&quot;, &quot;...
+## $ wage           &lt;chr&gt; &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;...</code></pre>
+</div>
+<div id="eda" class="section level2">
+<h2>EDA</h2>
+<div id="relationship" class="section level3">
+<h3>relationship</h3>
+<p> 저번 포스트에 이어서 계속해서 나머지 변수들에 대해 알아보겠습니다.</p>
+<pre class="r"><code>adult$relationship %&gt;% unique()</code></pre>
+<pre><code>## [1] &quot;Not-in-family&quot;  &quot;Husband&quot;        &quot;Wife&quot;           &quot;Own-child&quot;     
+## [5] &quot;Unmarried&quot;      &quot;Other-relative&quot;</code></pre>
+<p> 이 변수 또한 범주형 변수입니다. 저번 포스트와 동일한 방법으로 시각화 해보겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  count(relationship, wage) %&gt;%
+  ggplot(aes(relationship, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Persons&quot;) +
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  coord_flip() -&gt; p; ggplotly(p)</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9],"base":[5918,856,37,67,218,745],"x":[7275,7449,944,5001,3228,823],"y":[1,2,3,4,5,6],"text":["relationship: Husband<br />n: 7275<br />wage: <=50K","relationship: Not-in-family<br />n: 7449<br />wage: <=50K","relationship: Other-relative<br />n:  944<br />wage: <=50K","relationship: Own-child<br />n: 5001<br />wage: <=50K","relationship: Unmarried<br />n: 3228<br />wage: <=50K","relationship: Wife<br />n:  823<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9],"base":[0,0,0,0,0,0],"x":[5918,856,37,67,218,745],"y":[1,2,3,4,5,6],"text":["relationship: Husband<br />n: 5918<br />wage: >50K","relationship: Not-in-family<br />n:  856<br />wage: >50K","relationship: Other-relative<br />n:   37<br />wage: >50K","relationship: Own-child<br />n:   67<br />wage: >50K","relationship: Unmarried<br />n:  218<br />wage: >50K","relationship: Wife<br />n:  745<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":92.7853881278539},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-659.65,13852.65],"tickmode":"array","ticktext":["0","5000","10000"],"tickvals":[0,5000,10000],"categoryorder":"array","categoryarray":["0","5000","10000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Persons","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,6.6],"tickmode":"array","ticktext":["Husband","Not-in-family","Other-relative","Own-child","Unmarried","Wife"],"tickvals":[1,2,3,4,5,6],"categoryorder":"array","categoryarray":["Husband","Not-in-family","Other-relative","Own-child","Unmarried","Wife"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":null,"family":null,"size":0}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"7f141d412935":{"x":{},"y":{},"fill":{},"type":"bar"}},"cur_data":"7f141d412935","visdat":{"7f141d412935":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>adult %&gt;%
+  count(relationship, wage) %&gt;%
+  group_by(relationship) %&gt;%
+  mutate(total_each_n = sum(n)) %&gt;%
+  mutate(ratio_each_wage = round(n / total_each_n*100, 1)) -&gt; df_tmp
+
+df_tmp %&gt;%
+  ggplot(aes(relationship, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;, position = &#39;fill&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Ratio&quot;) +
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  coord_flip() -&gt; p; ggplotly(p)</code></pre>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9],"base":[0.448571212006367,0.103070439494281,0.0377166156982671,0.0132202052091555,0.0632617527568195,0.475127551020408],"x":[0.551428787993633,0.896929560505719,0.962283384301733,0.986779794790845,0.93673824724318,0.524872448979592],"y":[1,2,3,4,5,6],"text":["relationship: Husband<br />n: 0.55142879<br />wage: <=50K","relationship: Not-in-family<br />n: 0.89692956<br />wage: <=50K","relationship: Other-relative<br />n: 0.96228338<br />wage: <=50K","relationship: Own-child<br />n: 0.98677979<br />wage: <=50K","relationship: Unmarried<br />n: 0.93673825<br />wage: <=50K","relationship: Wife<br />n: 0.52487245<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9],"base":[0,0,0,0,0,0],"x":[0.448571212006367,0.103070439494281,0.0377166156982671,0.0132202052091555,0.0632617527568195,0.475127551020408],"y":[1,2,3,4,5,6],"text":["relationship: Husband<br />n: 0.44857121<br />wage: >50K","relationship: Not-in-family<br />n: 0.10307044<br />wage: >50K","relationship: Other-relative<br />n: 0.03771662<br />wage: >50K","relationship: Own-child<br />n: 0.01322021<br />wage: >50K","relationship: Unmarried<br />n: 0.06326175<br />wage: >50K","relationship: Wife<br />n: 0.47512755<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":92.7853881278539},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.05,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Ratio","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,6.6],"tickmode":"array","ticktext":["Husband","Not-in-family","Other-relative","Own-child","Unmarried","Wife"],"tickvals":[1,2,3,4,5,6],"categoryorder":"array","categoryarray":["Husband","Not-in-family","Other-relative","Own-child","Unmarried","Wife"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":null,"family":null,"size":0}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"7f1473fe59ef":{"x":{},"y":{},"fill":{},"type":"bar"}},"cur_data":"7f1473fe59ef","visdat":{"7f1473fe59ef":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> relationship이 남편과 아내일때 중산층이 되는 비율이 가장 높습니다.</p>
+</div>
+<div id="race" class="section level3">
+<h3>race</h3>
+<p> <code>race</code> 변수는 인종에 대한 변수입니다.</p>
+<pre class="r"><code>adult$race %&gt;% unique()</code></pre>
+<pre><code>## [1] &quot;White&quot;              &quot;Black&quot;              &quot;Asian-Pac-Islander&quot;
+## [4] &quot;Amer-Indian-Eskimo&quot; &quot;Other&quot;</code></pre>
+<p> 총 5가지의 범주가 있습니다. 이 변수도 동일하게 시각화하겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  count(race, wage) %&gt;%
+  ggplot(aes(race, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Persons&quot;) +
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  coord_flip() -&gt; p; ggplotly(p)</code></pre>
+<div id="htmlwidget-3" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9],"base":[36,276,387,25,7117],"x":[275,763,2737,246,20699],"y":[1,2,3,4,5],"text":["race: Amer-Indian-Eskimo<br />n:   275<br />wage: <=50K","race: Asian-Pac-Islander<br />n:   763<br />wage: <=50K","race: Black<br />n:  2737<br />wage: <=50K","race: Other<br />n:   246<br />wage: <=50K","race: White<br />n: 20699<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9],"base":[0,0,0,0,0],"x":[36,276,387,25,7117],"y":[1,2,3,4,5],"text":["race: Amer-Indian-Eskimo<br />n:    36<br />wage: >50K","race: Asian-Pac-Islander<br />n:   276<br />wage: >50K","race: Black<br />n:   387<br />wage: >50K","race: Other<br />n:    25<br />wage: >50K","race: White<br />n:  7117<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":116.164383561644},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-1390.8,29206.8],"tickmode":"array","ticktext":["0","10000","20000"],"tickvals":[0,10000,20000],"categoryorder":"array","categoryarray":["0","10000","20000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Persons","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,5.6],"tickmode":"array","ticktext":["Amer-Indian-Eskimo","Asian-Pac-Islander","Black","Other","White"],"tickvals":[1,2,3,4,5],"categoryorder":"array","categoryarray":["Amer-Indian-Eskimo","Asian-Pac-Islander","Black","Other","White"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":null,"family":null,"size":0}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"7f142b18238e":{"x":{},"y":{},"fill":{},"type":"bar"}},"cur_data":"7f142b18238e","visdat":{"7f142b18238e":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>adult %&gt;%
+  count(race, wage) %&gt;%
+  group_by(race) %&gt;%
+  mutate(total_each_n = sum(n)) %&gt;%
+  mutate(ratio_each_wage = round(n / total_each_n*100, 1)) -&gt; df_tmp
+
+df_tmp %&gt;%
+  ggplot(aes(race, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;, position = &#39;fill&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Ratio&quot;) +
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  coord_flip() -&gt; p; ggplotly(p)</code></pre>
+<div id="htmlwidget-4" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9],"base":[0.115755627009646,0.265640038498556,0.123879641485275,0.0922509225092251,0.255859936727064],"x":[0.884244372990354,0.734359961501444,0.876120358514725,0.907749077490775,0.744140063272936],"y":[1,2,3,4,5],"text":["race: Amer-Indian-Eskimo<br />n: 0.88424437<br />wage: <=50K","race: Asian-Pac-Islander<br />n: 0.73435996<br />wage: <=50K","race: Black<br />n: 0.87612036<br />wage: <=50K","race: Other<br />n: 0.90774908<br />wage: <=50K","race: White<br />n: 0.74414006<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9],"base":[0,0,0,0,0],"x":[0.115755627009646,0.265640038498556,0.123879641485275,0.0922509225092251,0.255859936727064],"y":[1,2,3,4,5],"text":["race: Amer-Indian-Eskimo<br />n: 0.11575563<br />wage: >50K","race: Asian-Pac-Islander<br />n: 0.26564004<br />wage: >50K","race: Black<br />n: 0.12387964<br />wage: >50K","race: Other<br />n: 0.09225092<br />wage: >50K","race: White<br />n: 0.25585994<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":116.164383561644},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.05,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Ratio","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,5.6],"tickmode":"array","ticktext":["Amer-Indian-Eskimo","Asian-Pac-Islander","Black","Other","White"],"tickvals":[1,2,3,4,5],"categoryorder":"array","categoryarray":["Amer-Indian-Eskimo","Asian-Pac-Islander","Black","Other","White"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":null,"family":null,"size":0}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"7f1468dd30b0":{"x":{},"y":{},"fill":{},"type":"bar"}},"cur_data":"7f1468dd30b0","visdat":{"7f1468dd30b0":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> 중산층 비율이 가장 높은 인종은 <code>Asian-Pac-Islander</code> 인종입니다.</p>
+</div>
+<div id="sex" class="section level3">
+<h3>sex</h3>
+<p> 성별 변수인 sex 변수를 살펴보겠습니다. 이 데이터의 성별 비율은 일단 어떻게 될까요?</p>
+<pre class="r"><code>adult %&gt;%
+  count(sex) %&gt;%
+  ggplot(aes(sex, n)) +
+  geom_bar(stat  = &#39;identity&#39;, fill = &#39;steelblue&#39;) + 
+  theme(axis.title.y =element_blank(),
+        axis.title.x = element_blank()) -&gt; p1
+
+adult %&gt;%
+  count(sex, wage) %&gt;%
+  ggplot(aes(sex, n, fill = wage)) + 
+  geom_bar(stat = &#39;identity&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme(axis.title.y =element_blank(),
+        axis.title.x = element_blank()) +
+  theme_minimal() +
+  theme(legend.position = &quot;none&quot;) +
+  theme(axis.title.y =element_blank(),
+        axis.title.x = element_blank()) -&gt; p2
+
+adult %&gt;%
+  count(sex, wage) %&gt;%
+  ggplot(aes(sex, n, fill = wage)) + 
+  geom_bar(stat = &#39;identity&#39;, position = &#39;fill&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() +
+  theme(axis.title.y =element_blank(),
+        axis.title.x = element_blank()) -&gt; p3
+
+
+grid.arrange(p2, p3, ncol = 2, widths = c(.43, .55))</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-9-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p> 여기서 좀 더 다른 변수와 sex 변수를 함께 고려해보도록 하겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  filter(race %in% c(&#39;White&#39;, &#39;Black&#39;)) %&gt;%
+  ggplot(aes(age, fill = wage)) +
+  geom_density(alpha = .5) + 
+  facet_grid(race ~ sex) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p; p</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> 흑인 여성일 경우 밀도분포곡선의 첨도가 높아 상대적으로 중산층일 이루는 연령대의 기간이 다른 경우에 비해 상대적으로 짧아 보입니다. 흑인 남성의 경우 약 35~65세 까지 중산층 비율이 높은 반면 흑인 여성은 고작 35~55세에서 10년 정도 짧은 기간동안에만 중산층 비율이 높습니다. 백인 여성의 경우 약 30~63세 까지 중산층 비율이 더 높습니다. 이는 흑인 여성이 상대적으로 사회적 약자일 수 있음을 의미합니다.</p>
+</div>
+<div id="capital_gain-capital_loss" class="section level3">
+<h3>capital_gain &amp; capital_loss</h3>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(x = wage, y = capital_gain, color = wage)) +
+  geom_boxplot() +
+  geom_jitter(alpha = .3) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;colour&#39;) +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  theme(legend.position = &quot;none&quot;) -&gt; p1; p1</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(capital_gain, fill = wage)) + 
+  geom_histogram() +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p2;
+
+adult %&gt;%
+  ggplot(aes(capital_gain, fill = wage)) + 
+  geom_histogram() +
+  scale_x_log10() +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p3; 
+
+adult %&gt;%
+  ggplot(aes(capital_gain, fill = wage)) +
+  geom_density(alpha = .5) +
+  scale_x_log10() +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p4; 
+
+grid.arrange(p2, p3, p4, ncol = 1)</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>vec_wage &lt;- ifelse(adult$wage == &quot;&lt;=50K&quot;, 0, 1)
+cor(vec_wage, adult$capital_gain)</code></pre>
+<pre><code>## [1] 0.2233288</code></pre>
+<p> 중산층 일수록 capital_gain이 높아보입니다. 투자를 통해 돈을 많이 번 경우 자체가 적어 멱함수 처럼 대부분 낮은 수치에 밀집 분포된 변수이지만 분명 중산층인지 아닌지를 구분하는데 도움이 되는 변수임에는 분명해 보입니다.</p>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(x = wage, y = capital_loss, color = wage)) +
+  geom_boxplot() +
+  geom_jitter(alpha = .3) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;colour&#39;) +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  theme(legend.position = &quot;none&quot;) -&gt; p1; p1</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(capital_loss, fill = wage)) + 
+  geom_histogram() +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p2;
+
+adult %&gt;%
+  ggplot(aes(capital_loss, fill = wage)) + 
+  geom_histogram() +
+  scale_x_log10() +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p3; 
+
+adult %&gt;%
+  ggplot(aes(capital_loss, fill = wage)) +
+  geom_density(alpha = .5) +
+  scale_x_log10() +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p4; 
+
+grid.arrange(p2, p3, p4, ncol = 1)</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> capital_loss도 멱함수 분포를 보입니다. 중산층이 아닌 경우에는 비교적 적은 금액 범위에서 capital_loss의 비율이 높습니다. 하지만 높은 금액 범위에서는 중산층의 capital_loss의 비율이 다소 높아 보입니다. 중산층이 아닌 사람들 중 capital_loss가 있는 사람들을 생각하면 일종의 개미투자자들이 생각납니다. 많은 금액을 투자하지 못해 손실의 비중이 적지만 손실을 보고 있는 경우가 제법 있는 거 같습니다. 중산층들의 경우 capital_loss 금액대가 상대적으로 높습니다. 돈의 여유가 있어서일까요? 투자를 약간 공격적으로 하기 때문일까요?…</p>
+</div>
+<div id="hours_per_week" class="section level3">
+<h3>hours_per_week</h3>
+<pre class="r"><code>adult$hours_per_week %&gt;% range()</code></pre>
+<pre><code>## [1]  1 99</code></pre>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(x = wage, y = hours_per_week, color = wage)) +
+  geom_jitter(alpha = .3) +
+  geom_boxplot(alpha = .5) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;colour&#39;) +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  theme(legend.position = &quot;none&quot;) -&gt; p1; p1</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(hours_per_week, fill = wage)) + 
+  geom_histogram() +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p2; p2</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(hours_per_week, fill = wage)) +
+  geom_density(alpha = .5) +
+  # scale_x_log10() +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p; p</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> 상대적으로 일하는 시간이 많은 경우 중산층인 경우의 비율이 높아 보입니다.</p>
+<p> 남자와 여자의 일하는 시간의 비율은 어떨까요?</p>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(hours_per_week, fill = wage)) +
+  geom_density(alpha = .5) +
+  # scale_x_log10() +
+  facet_wrap(~sex) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p; p</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="native_country" class="section level3">
+<h3>native_country</h3>
+<pre class="r"><code>adult$native_country %&gt;% unique()</code></pre>
+<pre><code>##  [1] &quot;United-States&quot;              &quot;Cuba&quot;                      
+##  [3] &quot;Jamaica&quot;                    &quot;India&quot;                     
+##  [5] &quot;?&quot;                          &quot;Mexico&quot;                    
+##  [7] &quot;South&quot;                      &quot;Puerto-Rico&quot;               
+##  [9] &quot;Honduras&quot;                   &quot;England&quot;                   
+## [11] &quot;Canada&quot;                     &quot;Germany&quot;                   
+## [13] &quot;Iran&quot;                       &quot;Philippines&quot;               
+## [15] &quot;Italy&quot;                      &quot;Poland&quot;                    
+## [17] &quot;Columbia&quot;                   &quot;Cambodia&quot;                  
+## [19] &quot;Thailand&quot;                   &quot;Ecuador&quot;                   
+## [21] &quot;Laos&quot;                       &quot;Taiwan&quot;                    
+## [23] &quot;Haiti&quot;                      &quot;Portugal&quot;                  
+## [25] &quot;Dominican-Republic&quot;         &quot;El-Salvador&quot;               
+## [27] &quot;France&quot;                     &quot;Guatemala&quot;                 
+## [29] &quot;China&quot;                      &quot;Japan&quot;                     
+## [31] &quot;Yugoslavia&quot;                 &quot;Peru&quot;                      
+## [33] &quot;Outlying-US(Guam-USVI-etc)&quot; &quot;Scotland&quot;                  
+## [35] &quot;Trinadad&amp;Tobago&quot;            &quot;Greece&quot;                    
+## [37] &quot;Nicaragua&quot;                  &quot;Vietnam&quot;                   
+## [39] &quot;Hong&quot;                       &quot;Ireland&quot;                   
+## [41] &quot;Hungary&quot;                    &quot;Holand-Netherlands&quot;</code></pre>
+<p> 와우…너무나 많은 나라들이 있네요 42개 국가들이라니… 나라에 따라 중산층 여부에 영향이 있을거 같긴 한데 너무 많은 범주를 가진 이 변수를 어떻게 해야 할까요?? 그리고 우리나라는 없는지 궁금합니다. 혹시 “South”라고 되어 있는 데이터가 우리나라에 대한 것일까요?(궁금…)</p>
+<p> 일단 각 나라별 중산층의 비율만을 비교해보도록 하겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  count(native_country, wage) %&gt;%
+  group_by(native_country) %&gt;%
+  mutate(total_each_n = sum(n)) %&gt;%
+  mutate(ratio_each_edu_wage = round(n / total_each_n*100, 1)) -&gt; df_tmp
+
+df_tmp %&gt;% 
+  filter(wage == &quot;&gt;50K&quot;) %&gt;%
+  arrange(desc(ratio_each_edu_wage)) %&gt;% pull(native_country) -&gt; x_axis_order
+
+df_tmp %&gt;%
+  ungroup() %&gt;%
+  mutate(native_country = factor(native_country, levels = x_axis_order, labels = x_axis_order)) %&gt;%
+  filter(!is.na(native_country)) %&gt;%
+  filter(native_country != &quot;?&quot;) -&gt; df_tmp_1
+
+df_tmp_1 %&gt;%
+  ggplot(aes(native_country, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;, position = &#39;fill&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Ratio&quot;) +
+  theme_minimal() +
+  coord_flip() -&gt; p; p</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> 이란이 중산층의 비율이 제일 높게 나타납니다. 미국은 잘 사는 나라이지만 빈부의 격차가 커서 그런지 중산층의 비율이 높아 보이지 않습니다. “South”가 만약 우리나라라면 우리나라도 중산층의 비율이…ㅠㅠ</p>
+<pre class="r"><code>adult %&gt;% head</code></pre>
+<pre><code>## # A tibble: 6 x 13
+##     age workclass education_num marital_status occupation relationship race 
+##   &lt;dbl&gt; &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;      &lt;chr&gt;        &lt;chr&gt;
+## 1    39 State-gov            13 Never-married  White-Col~ Not-in-fami~ White
+## 2    50 Self-emp~            13 Married-civ-s~ White-Col~ Husband      White
+## 3    38 Private               9 Divorced       Blue-Coll~ Not-in-fami~ White
+## 4    53 Private               7 Married-civ-s~ Blue-Coll~ Husband      Black
+## 5    28 Private              13 Married-civ-s~ Professio~ Wife         Black
+## 6    37 Private              14 Married-civ-s~ White-Col~ Wife         White
+## # ... with 6 more variables: sex &lt;chr&gt;, capital_gain &lt;dbl&gt;, capital_loss &lt;dbl&gt;,
+## #   hours_per_week &lt;dbl&gt;, native_country &lt;chr&gt;, wage &lt;chr&gt;</code></pre>
+</div>
+</div>
+<div id="상관관계" class="section level2">
+<h2>상관관계</h2>
+<p> 여기서 잠깐 변수들가의 상관관계를 간단히 파악해보겠습니다. 우리의 데이터에는 범주형 변수가 많고 각 범주형 변수 내에서 많은 경우의 수들이 존재하기에 모든 경우의 상관관계를 한 번에 파악해보는건 비추입니다. 일단 연속형 변수들과 경우의 수가 적은 범주형 변수 몇 개를 선택하여 상관분석을 해 보겠습니다. 데이터의 수가 많으므로 무작위로 1000개만 추출하여 시각화 해 보겠습니다.</p>
+<p> wage 변수와 다른 연속형 변수들의 상관계수 계산 유도를 위해 wage 변수를 0(&lt;=50K), 1(&gt;50K)로 변환했습니다.</p>
+<pre class="r"><code>select_if(adult, is.numeric) -&gt; df_1 # 연속형 변수를 가진 데이터만 선택
+
+adult %&gt;%
+  select(wage, marital_status, occupation, race, sex) %&gt;%
+  bind_cols(df_1) %&gt;%
+  mutate(wage = ifelse(wage == &quot;&lt;=50K&quot;, 0, 1)) -&gt; df_tmp
+
+set.seed(2020)
+df_tmp %&gt;%
+  sample_n(1000) -&gt; df_tmp_1000
+
+df_tmp_1000 %&gt;%
+  ggpairs() -&gt; p</code></pre>
+<pre class="r"><code>p +
+  theme(axis.text.x = element_text(angle = 45))</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-25-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p> 너무 많은 정보를 한꺼번에 담고 있어 다소 해석이 어렵지만 잘 생각해보면 나름 의미있어 보입니다. 연속형 변수들만 사용해 다시 시각화해 보겠습니다.</p>
+<pre class="r"><code>select_if(df_tmp_1000, is.numeric) %&gt;%
+  ggpairs() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45))</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-26-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p> education_num &gt; hours_per_week &gt; capital_gain &gt; age &gt; capital_loss 순으로 상관계수가 높습니다. 이번엔 범주형 변수들만 시각화해보겠습니다. 이 때 변환했던 wage 변수를 다시 명목형으로 변환합니다.</p>
+<pre class="r"><code>df_tmp_1000 %&gt;%
+  select(wage, marital_status, occupation, race, sex) %&gt;%
+  mutate(wage = ifelse(wage == 0, &quot;&lt;=50K&quot;, &quot;&gt;50K&quot;)) -&gt; df_tmp_1000_fctr_1</code></pre>
+<pre class="r"><code>df_tmp_1000_fctr_1 %&gt;%
+  ggpairs(mapping = aes(color = wage)) + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45))</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-28-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p> 범주형 변수끼리 묶은 그래프는 해석이 난해합니다. 좀 더 범위를 좁히도록 하겠습니다.</p>
+<pre class="r"><code>ggpairs(df_tmp_1000_fctr_1[, c(1, 2)], mapping = aes(color = wage)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45)) -&gt; p_mat; p_mat</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-29-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p> 왼쪽 아래 그래프는 이렇게 해석할 수 있습니다.</p>
+<pre class="r"><code>p_mat[2, 1]</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-30-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>세로 축은 총 6번의 반복이 있는데 각각 위에서부터 Divorce부터 Widowed까지를 의미합니다. 가로축은 wage 즉, <span class="math inline">\(&lt;=50K\)</span>과 <span class="math inline">\(&gt;50K\)</span>을 의미하고 세로축은 데이터의 빈도를 의미합니다. 제일 왼쪽 위의 첫 번째 반복에서는 오른쪽 첫 번째 막대그래프가 <span class="math inline">\(&lt;=50K\)</span>과 <span class="math inline">\(&gt;50K\)</span>일 경우로 나뉘어서 표시됩니다. 두 번째 반복에서는 오른쪽 두 번째 막대가 나뉘어서 보여진다고 할 수 있습니다.</p>
+<p> 오른쪽 위의 그래프는 다음과 같이 해석할 수 있습니다.</p>
+<pre class="r"><code>p_mat[1, 2]</code></pre>
+<p><img src="/post/2020-04-30-Adult_Census_Data_EDA_2_files/figure-html/unnamed-chunk-31-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> 세로 축은 총 2번의 반복이 있는데 각각 위에서부터 <span class="math inline">\(&lt;=50K\)</span>인 경우와 <span class="math inline">\(&gt;50K\)</span> 경우를 의미합니다. 가로축은 marital_status이고 세로축은 데이터의 빈도를 의미합니다.</p>
+<p> 이제 나머지 범주형 변수 vs 변주형 변수에 대한 그래프들도 쉽게 이해하실 수 있을 거라 생각합니다.</p>
+<p> 이상으로 EDA를 마치고 본격적으로 로지스틱 회귀분석으로 넘어가겠습니다.</p>
+</div>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.69.0" />
+
+
+<title>로지스틱 회귀(Logistic Regression) 예제: 중산층 예측(with Adult Dataset) - My DataScience Blog</title>
+<meta property="og:title" content="로지스틱 회귀(Logistic Regression) 예제: 중산층 예측(with Adult Dataset) - My DataScience Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">Daniel Kim</a></li>
+    
+    <li><a href="https://github.com/jakinpilla">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/jakinpilla">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">3 min read</span>
+    
+
+    <h1 class="article-title">로지스틱 회귀(Logistic Regression) 예제: 중산층 예측(with Adult Dataset)</h1>
+
+    
+    <span class="article-date">2020-04-27</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="data-loading" class="section level2">
+<h2>Data Loading</h2>
+<p> 이번 포스트에서는 Adult 라는 데이터를 이용해 직접 로지스틱 회귀분석을 해 보도록 하겠습니다. 이 Adult 데이터는 인구통계학적으로 수입에 대한 주제를 고찰해 볼 수 있는 데이터입니다. Census Income 데이터라고도 합니다.</p>
+<p> 먼저 데이터를 받으셔야 합니다. 항상 분석의 첫 단계는 데이터를 수집하는 일입니다. 그런데 이것이 실무에선 여간 만만한 일이 아닙니다. 대부분 분석을 위한 데이터들은 보안이라는 벽 때문에 직접 접근이 어렵고 막상 수많은 행정절차를 걸쳐 데이터를 만질 수 있는 곳에 입성(?)하게 되더라도 정말 말도 안되게 마구 DB에 쑤셔넣어진 쓰레기 데이터들과 만나게 되는 것이 현실입니다. 바로 그러한 좌절 속에서 데이터 전처리를 해 분석을 할 수 있는 데이터를 얻게 된다는 것은 데이터 분석가에겐 천국을 만난 기분이 들게 하는 일입니다.</p>
+<p> 이번 포스트에선 그런 전처리가 말끔하게 이미 다 되어있는 데이터를 가지고 하는 간단한 로지스틱 회귀분석을 해보려 합니다. <a href="https://archive.ics.uci.edu/ml/index.php">UCI Machine Learning</a> 이라는 사이트에서 Adult 데이터를 받아보도록 하겠습니다.</p>
+<p> 다음의 코드를 실행하면 adult라는 데이터를 다운받아 adult.csv 파일로 저장할 수 있습니다.</p>
+<pre><code>adult &lt;- read.csv(&#39;https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data&#39;, 
+                  header = F, 
+                  strip.white = T)
+
+names(adult) &lt;- c(&#39;age&#39;, &#39;workclass&#39;, &#39;fnlwgt&#39;, &#39;education&#39;, &#39;education_num&#39;, &#39;marital_status&#39;, 
+                  &#39;occupation&#39;, &#39;relationship&#39;, &#39;race&#39;, &#39;sex&#39;, &#39;capital_gain&#39;, &#39;capital_loss&#39;, 
+                  &#39;hours_per_week&#39;, &#39;native_country&#39;, &#39;wage&#39;)
+
+adult %&gt;% write_csv(&#39;adult.csv&#39;)</code></pre>
+<p> 저장된 데이터를 불러와 adult라는 변수에 담아보겠습니다. 그리고 adult 데이터의 대략적인 구조도 glimpse() 함수를 사용해 알아보겠습니다.</p>
+<pre class="r"><code>adult &lt;- read_csv(&#39;adult.csv&#39;)
+adult %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 32,561
+## Variables: 15
+## $ age            &lt;dbl&gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...
+## $ workclass      &lt;chr&gt; &quot;State-gov&quot;, &quot;Self-emp-not-inc&quot;, &quot;Private&quot;, &quot;Private...
+## $ fnlwgt         &lt;dbl&gt; 77516, 83311, 215646, 234721, 338409, 284582, 160187...
+## $ education      &lt;chr&gt; &quot;Bachelors&quot;, &quot;Bachelors&quot;, &quot;HS-grad&quot;, &quot;11th&quot;, &quot;Bachel...
+## $ education_num  &lt;dbl&gt; 13, 13, 9, 7, 13, 14, 5, 9, 14, 13, 10, 13, 13, 12, ...
+## $ marital_status &lt;chr&gt; &quot;Never-married&quot;, &quot;Married-civ-spouse&quot;, &quot;Divorced&quot;, &quot;...
+## $ occupation     &lt;chr&gt; &quot;Adm-clerical&quot;, &quot;Exec-managerial&quot;, &quot;Handlers-cleaner...
+## $ relationship   &lt;chr&gt; &quot;Not-in-family&quot;, &quot;Husband&quot;, &quot;Not-in-family&quot;, &quot;Husban...
+## $ race           &lt;chr&gt; &quot;White&quot;, &quot;White&quot;, &quot;White&quot;, &quot;Black&quot;, &quot;Black&quot;, &quot;White&quot;...
+## $ sex            &lt;chr&gt; &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Female&quot;, &quot;Female&quot;, ...
+## $ capital_gain   &lt;dbl&gt; 2174, 0, 0, 0, 0, 0, 0, 0, 14084, 5178, 0, 0, 0, 0, ...
+## $ capital_loss   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+## $ hours_per_week &lt;dbl&gt; 40, 13, 40, 40, 40, 40, 16, 45, 50, 40, 80, 40, 30, ...
+## $ native_country &lt;chr&gt; &quot;United-States&quot;, &quot;United-States&quot;, &quot;United-States&quot;, &quot;...
+## $ wage           &lt;chr&gt; &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;...</code></pre>
+<p> 이 데이터는 모두 32,561명의 성인들에 대한 데이터입니다. 총 변수의 개수는 15개입니다.</p>
+</div>
+<div id="eda" class="section level2">
+<h2>EDA</h2>
+<p> 먼저 첫 번째 변수인 age부터 고찰해 보겠습니다. age는 나이입니다.</p>
+<pre class="r"><code> adult %&gt;% 
+  ggplot(aes(x = 0, y = age)) + geom_jitter(color = &#39;steelblue&#39;, alpha = .3) + geom_boxplot(alpha = .5) +
+  stat_summary(geom=&quot;text&quot;, fun.y=quantile,
+               aes(label=sprintf(&quot;%1.1f&quot;, ..y..)),
+               position=position_nudge(x=0.33), 
+               size=4.5) +
+  ylab(&quot;Age(나이)&quot;) +
+  theme_minimal() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) -&gt; p1
+
+adult %&gt;%
+  ggplot(aes(age)) + geom_histogram(fill = &quot;steelblue&quot;, colour = &#39;white&#39;) + 
+  xlab(&quot;Age(나이)&quot;) + theme_minimal() -&gt; p2
+
+grid.arrange(p1, p2, ncol = 2)</code></pre>
+<p><img src="/post/2020-04-27-Logistic_Regression_Example_With_Adult_Data_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> 사분위수 중 Q1(lower quartile)은 28세이고 Q3(upper quartile)은 48세입니다. Q2(median)은 37세입니다. 대략 주로 많은 데이터가 25~45세 사이에 분포되어 있습니다. 특이하게도 90세가 되는 데이터가 히스토그램 꼬리부분에서 발견되어지네요…</p>
+<p> 두 변째 변수는 <code>workclass</code> 입니다.</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

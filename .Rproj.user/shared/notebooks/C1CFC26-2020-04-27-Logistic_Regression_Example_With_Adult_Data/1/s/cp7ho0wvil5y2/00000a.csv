@@ -1,0 +1,5 @@
+"0","adult %>%"
+"0","  ggplot(aes(age,fill = wage)) +"
+"0","  geom_histogram( colour = 'white') + "
+"0","  scale_fill_manual(values = c('steelblue', 'red'), aesthetics = 'fill') +"
+"0","  theme_minimal() + theme(legend.position = 'none') -> p1"

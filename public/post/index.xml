@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on My DataScience Blog</title>
+    <link>/post/</link>
+    <description>Recent content in Posts on My DataScience Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 30 Apr 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Adult Census Income Dataset EDA 1 (Part1)</title>
+      <link>/2020/04/30/adult-census-income-dataset-eda-1-part1/</link>
+      <pubDate>Thu, 30 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/04/30/adult-census-income-dataset-eda-1-part1/</guid>
+      <description>Data Loading 이번 포스트에서는 Adult 라는 데이터에 대해 탐험해보려 합니다. 왜 EDA를 하려고 하냐면 이 데이터를 가지고 추후 로지스틱 회귀분석을 해 보려 하기 때문입니다. 이 Adult 데이터는 인구통계학적으로 수입에 대한 주제를 고찰해 볼 수 있는 데이터입니다. Adult Census Income 데이터라고도 합니다.
+ 먼저 데이터를 받으셔야 합니다. 항상 분석의 첫 단계는 데이터를 수집하는 일입니다. 그런데 이것이 실무에선 여간 만만한 일이 아닙니다. 대부분 분석을 위한 데이터들은 보안이라는 벽 때문에 직접 접근이 어렵고 막상 수많은 행정절차를 걸쳐 데이터를 만질 수 있는 곳에 입성(?</description>
+    </item>
+    
+    <item>
+      <title>Adult Census Income Dataset EDA 2 (Part2)</title>
+      <link>/2020/04/30/adult-census-income-dataset-eda-2-part2/</link>
+      <pubDate>Thu, 30 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/04/30/adult-census-income-dataset-eda-2-part2/</guid>
+      <description>Data Loading 먼저 데이터를 불러오겠습니다. 지난 번 포스트에서 전처리한 데이터를 사용합니다. 그 데이터는 adult_1.csv 파일에 저장되어 있습니다.
+adult &amp;lt;- read_csv(&amp;#39;./data/adult_1.csv&amp;#39;)adult %&amp;gt;% glimpse()## Observations: 32,561## Variables: 13## $ age &amp;lt;dbl&amp;gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...## $ workclass &amp;lt;chr&amp;gt; &amp;quot;State-gov&amp;quot;, &amp;quot;Self-emp-not-inc&amp;quot;, &amp;quot;Private&amp;quot;, &amp;quot;Private...## $ education_num &amp;lt;dbl&amp;gt; 13, 13, 9, 7, 13, 14, 5, 9, 14, 13, 10, 13, 13, 12, .</description>
+    </item>
+    
+    <item>
+      <title>로지스틱 회귀(Logistic Regression) 모형의 평가: 로그우도, 이탈도 등</title>
+      <link>/2020/04/30/%EB%A1%9C%EC%A7%80%EC%8A%A4%ED%8B%B1-%ED%9A%8C%EA%B7%80logistic-regression-%EB%AA%A8%ED%98%95%EC%9D%98-%ED%8F%89%EA%B0%80-%EB%A1%9C%EA%B7%B8%EC%9A%B0%EB%8F%84-%EC%9D%B4%ED%83%88%EB%8F%84-%EB%93%B1/</link>
+      <pubDate>Thu, 30 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/04/30/%EB%A1%9C%EC%A7%80%EC%8A%A4%ED%8B%B1-%ED%9A%8C%EA%B7%80logistic-regression-%EB%AA%A8%ED%98%95%EC%9D%98-%ED%8F%89%EA%B0%80-%EB%A1%9C%EA%B7%B8%EC%9A%B0%EB%8F%84-%EC%9D%B4%ED%83%88%EB%8F%84-%EB%93%B1/</guid>
+      <description>로지스틱 회귀 모형의 평가: 로그 우도 통계량 로지스틱 회귀에서도 선형회귀에서와 마찬가지로 관측값과 예측값을 비교해서 모형의 적합도를 평가합니다. 이때 쓰이는 척도가 로그우도(log-likelihood)입니다. 로지스틱 회귀 모델에서 로그우도를 계산하는 식은 다음과 같습니다.
+\[LL = \sum_{i=1}^{N} \left[ Y_{i} \ln(P(Y_{i})) + (1-Y_{i})\ln(1 - P(Y_{i})) \right]\]
+ 머신러닝 학습을 하게 되면 우도라는 말이 자주 등장합니다. 그리고 그와 함께 따라 다니는 개념이 최대우도추정(Maximum Likelihood Estimation)입니다. 우도와 최대우도추정을 이번 포스트에서 모두 다루기는 어렵습니다.</description>
+    </item>
+    
+    <item>
+      <title>로지스틱 회귀(Logistic Regression)의 기본 원리</title>
+      <link>/2020/04/23/%EB%A1%9C%EC%A7%80%EC%8A%A4%ED%8B%B1-%ED%9A%8C%EA%B7%80logistic-regression%EC%9D%98-%EA%B8%B0%EB%B3%B8-%EC%9B%90%EB%A6%AC/</link>
+      <pubDate>Thu, 23 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/04/23/%EB%A1%9C%EC%A7%80%EC%8A%A4%ED%8B%B1-%ED%9A%8C%EA%B7%80logistic-regression%EC%9D%98-%EA%B8%B0%EB%B3%B8-%EC%9B%90%EB%A6%AC/</guid>
+      <description>로지스틱 회귀란? 로지스틱 회귀는 결과변수가 범주형 변수이고 예측변수들이 연속변수 또는 범주형 변수인 회귀분석 모형입니다. 보통 머신러닝에서 분류(Classification)을 위해 가장 기본이 되는 모형으로 사용됩니다. 이 때 결과변수가 두 가지일(0 &amp;amp; 1, False &amp;amp; True, Neg &amp;amp; Pos 등) 경우 Binary Logistic Regression라 하고, 결과변수가 셋 이상일 경우 Multinomial Logistic Regression 이라고 합니다.
+로지스틱 회귀의 원리 예측변수가 \(X_{1i}\) 하나 뿐인 가장 단순한 경우에, Y가 1이 될(혹은 True, Pos 등, 상대적으로 관심이 있어 예측을 하고 싶은 대상을 1로 둡니다.</description>
+    </item>
+    
+  </channel>
+</rss>

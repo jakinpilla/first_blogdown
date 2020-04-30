@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.69.0" />
+
+
+<title>로지스틱 회귀(Logistic Regression) 모형의 평가: 로그우도, 이탈도 등 - My DataScience Blog</title>
+<meta property="og:title" content="로지스틱 회귀(Logistic Regression) 모형의 평가: 로그우도, 이탈도 등 - My DataScience Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">Daniel Kim</a></li>
+    
+    <li><a href="https://github.com/jakinpilla">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/jakinpilla">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">11 min read</span>
+    
+
+    <h1 class="article-title">로지스틱 회귀(Logistic Regression) 모형의 평가: 로그우도, 이탈도 등</h1>
+
+    
+    <span class="article-date">2020-04-30</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<div id="로지스틱-회귀-모형의-평가-로그-우도-통계량" class="section level2">
+<h2>로지스틱 회귀 모형의 평가: 로그 우도 통계량</h2>
+<p> 로지스틱 회귀에서도 선형회귀에서와 마찬가지로 관측값과 예측값을 비교해서 모형의 적합도를 평가합니다. 이때 쓰이는 척도가 로그우도(log-likelihood)입니다. 로지스틱 회귀 모델에서 로그우도를 계산하는 식은 다음과 같습니다.</p>
+<p><span class="math display">\[LL = \sum_{i=1}^{N} \left[  Y_{i} \ln(P(Y_{i})) + (1-Y_{i})\ln(1 - P(Y_{i}))  \right]\]</span></p>
+<p> 머신러닝 학습을 하게 되면 <strong>우도</strong>라는 말이 자주 등장합니다. 그리고 그와 함께 따라 다니는 개념이 <strong>최대우도추정(Maximum Likelihood Estimation)</strong>입니다. 우도와 최대우도추정을 이번 포스트에서 모두 다루기는 어렵습니다. 언젠가 자세한 설명을 한 포스트를 올리겠습니다.</p>
+<p> 다만, 이번 포스트에서는 왜 로그가능도를 계산하는 식이 위와같이 나왔는가에 대한 설명을 수학적으로만 하려고 합니다. 다소 어려운 개념을 포함하므로 이해하기 어려우시면 다음 올리는 포스트를 참고하여 주시기 바랍니다.</p>
+<div id="로지스틱-회귀-결과변수의-확률분포" class="section level3">
+<h3>로지스틱 회귀 결과변수의 확률분포</h3>
+<p> 로지스틱 회귀의 결과변수는 0 또는 1의 값을 가지는 베르누이 확률변수입니다.(뭐지 이 베르누이는?…) 이 말을 <span class="math inline">\(Y \text{~} Brenoulli(P)\)</span>라고도 표현합니다. 만약 1이 나올 확률이 <span class="math inline">\(P\)</span>라고 한다면 반대로 0이 나올 확률은 <span class="math inline">\(1-P\)</span>입니다.</p>
+<p> 여기서의 <span class="math inline">\(P\)</span>를 좀 더 쉽게 이해해 볼까요? 저는 하얀 바둑알과 검은 바둑알이 마구 섞여져 있는 주머니를 머리속에서 상상하곤 합니다. 이 바둑알들의 크기와 모양은 완전히 동일합니다 .저는 지금 이 주머니에 얼마나 많은 바둑알 들이 서로 몇 개씩 섞여 있는지 상태를 모릅니다. 이런 상황속에서 제가 주머니에 손을 넣어 바둑알 1개를 꺼내었더니 하얀 바둑알이 나왔고, 그 꺼내진 바둑알을 다시 주머니에 넣고 마구 흔들어 다시 바둑알을 꺼내었더니 이번에는 검은 바둑알이 나왔다고 하겠습니다. 이런 장난(실험…)을 하면서 저는 이 주머니 속에서 검은 바둑알을 꺼낼 확률이 매우 알고 싶어졌습니다. 그래서 검은 바둑알이 나올 확률을 그 값을 모르지만 일단 <span class="math inline">\(P\)</span>라고 두었습니다. 그럼 반대로 하얀 바둑알이 나올 확률은 전체 확률에서 검은 바둑알 꺼낼 확률을 제외한 값이므로 <span class="math inline">\(1-P\)</span>가 됩니다.</p>
+<p> 그런데 저는 위에서 관심이 있는 사건이 검은 바둑알을 꺼내는 사건이고 이 검은 바둑알을 꺼내는 사건에 대한 확률을 <span class="math inline">\(P\)</span>라고 했습니다. 즉 결과인 <span class="math inline">\(Y_{i}\)</span>를 검은 바둑알이면 1, 하얀 바둑알이면 0으로 생각한다는 의미입니다.</p>
+<p> 위와 같은 상황을 좀 더 수식으로 표현하면 다음과 같습니다.</p>
+<p><span class="math display">\[ \text{Bernoulli}(Y;P) = \begin{cases} P &amp; \text{if black } Y_{i} = 1 \\ 1 - P &amp; \text{if white } Y_{i} = 0 \end{cases}\]</span></p>
+<p> 자…여기서 만약 위의 표현식을 조건문 없이 표현한다고 하면 어떻게 될까요?</p>
+<p><span class="math display">\[ \text{Bernoulli}(Y;P) =  P^{Y_{i}}(1-P)^{1-Y_{i}} \quad \quad (Y_{i} = 1, 0)\]</span></p>
+<p> <span class="math inline">\(Y_{i}\)</span>에 직접 0과 1을 대입하여 생각해보면 위의 식과 아래의 식이 동일함을 알 수 있습니다. <span class="math inline">\(Y_{i} = 1\)</span>이면 전체적인 식이 단순히 <span class="math inline">\(P\)</span>이 되고 <span class="math inline">\(Y_{i} = 0\)</span>이면 전체적인 식이 단순히 <span class="math inline">\(1-P\)</span>이 가 되기 때문입니다.</p>
+<p> 결론적으로 결과변수는 <span class="math inline">\(P^{Y_{i}}(1-P)^{1-Y_{i}}\)</span>인 확률분포를 따릅니다.</p>
+</div>
+<div id="로그를-씌우는-이유" class="section level3">
+<h3>로그를 씌우는 이유</h3>
+<p> 자 이제부터 위의 식을 가지고 좀 더 나아가 생각해보겠습니다. 위의 식에서 <span class="math inline">\(i\)</span> 첨자는 <span class="math inline">\(i\)</span>번째를 의미합니다. 정확히는 <span class="math inline">\(i\)</span>번째 사건을 의미하지요. 그렇다면 현재 두 번의 사건이 일어났는데 이 두 번의 사건이 일어날 수있는 확률은 어떻게 계산할까요?</p>
+<p> 우리는 여기서 두 사건이 독립이라는 가정을 하게 됩니다. 즉 앞의 사건이 뒤의 사건에 영향을 미치지 않는다는 의미입니다. 앞서 저는 바둑알을 꺼낸 후 다시 주머니에 넣는다고 했습니다. 즉 앞에서 제가 어떤 바둑알을 꺼냈든지 뒤의 사건에는 영향이 없습니다. 이런 경우 우리는 사건들이 서로 독립이다라고 표현합니다. 그런데 사건이 독립일 때 이 두 사건이 일어날 확률은 단순히 각각의 사건이 일어날 확률을 곱하는 것입니다. 즉,</p>
+<p><span class="math display">\[P^{Y_{1}}(1-P)^{1-Y_{1}} \times P^{Y_{2}}(1-P)^{1-Y_{2}}\]</span></p>
+<p> 위와 같은 수식을 좀 더 간결하고 우아하게 표현하면 파이 프로덕트(product) 연산자를 이용하여 다음과 같이 표현할 수 있습니다.</p>
+<p><span class="math display">\[\prod_{i=1}^{2} P^{Y_{i}}(1-P)^{1-Y_{i}}\]</span></p>
+<p> 이것을 두 번의 사건이 아닌 N번의 사건이 발생한 경우의 확률을 구하는 식으로 변환하려면 단순히 2를 N으로 바꾸어 주면 됩니다. 그래서 결국 첫 번째 사건부터 N번째 사건이 발생할 확률을 구하면 다음의 식이 나오게 됩니다.</p>
+<p><span class="math display">\[\prod_{i=1}^{N} P^{Y_{i}}(1-P)^{1-Y_{i}}\]</span></p>
+<p> 이것이 바로 로지스틱 회귀의 결과변수에 대한 우도(likelihood)에 대한 수식입니다. 예를 들어보면 제가 처음에 하얀 색, 두 번째는 검은 색, 세번째는 하얀 색의 바둑알을 주머니에서 뽑아 총 세 번의 사건이 발생했다라고 한다면 이 사건의 우도는 <span class="math inline">\((1-P) \times P \times (1-P)\)</span>입니다.</p>
+<p> 그런데 이 식은 곱하기로 연결되어 있어서 미분 계산을 하기 어렵습니다. 추후 우리는 최대우도추정을 위해 미분을 통해 우도가 최대가 되는 지점을 찾아내야 하는 상황과 마주쳐야 하는데 미분을 하기 너무 어려운 이 식은 부담이 됩니다. 그래서 여기서 하나의 트릭이 등장하하는데 바로 위의 식에 로그를 씌우는 것입니다.</p>
+<p> 로그는 로그 안의 수식이 곱으로 연결되어 있을 때 이를 더하기로 분리해 줍니다.(이는 고등학교때 배우셨…;;;) 파이 product 연산자는 시그마 sum 연산자로 변화되고 안의 항들의 지수들은 앞으로 튀어나와 단순히 하나의 항으로 뒤의 항들과 곱해집니다. 이런 수식은 앞의 수식보다 휠씬 미분 계산을 하기가 쉽습니다.즉 위의 식에 로그를 씌우면 다음과 같이 변신합니다. 바로 처음에 등장했던 로지스틱 회귀 모형의 로그우도에 관한 식입니다.</p>
+<p><span class="math display">\[\sum_{i=1}^{N} \left[  Y_{i} \ln(P) + (1-Y_{i})\ln(1 - P)  \right]\]</span></p>
+<p> 위 식의 의미를 좀 더 자세히 살펴보겠습니다. 만약 <span class="math inline">\(Y_{i} = 1\)</span>이면 위의 식은</p>
+<p><span class="math display">\[ \sum_{i=1}^{N} ln(P) \]</span></p>
+<p>이 됩니다. 만약 <span class="math inline">\(Y_{i} = 1\)</span> 일 때 <span class="math inline">\(Y_{i} = 1\)</span>이 되는 확률을 정확히 <span class="math inline">\(P=1\)</span>로 예측했다면 우도는 0이 됩니다. 반대로 <span class="math inline">\(P=0\)</span>로 예측했다면 우도는 <span class="math inline">\(-\infty\)</span>가 됩니다.</p>
+<p>반대의 경우를 생각해보겠습니다. 만약 <span class="math inline">\(Y_{i} = 0\)</span> 일 때 우도의 수식은 다음과 같아집니다.</p>
+<p><span class="math display">\[ \sum_{i=1}^{N} ln(1-P) \]</span></p>
+<p>이 경우, <span class="math inline">\(Y_{i} = 1\)</span>이 되는 확률을 정확히 <span class="math inline">\(P=0\)</span>로 예측했다면 우도는 0이 됩니다. 반대로 <span class="math inline">\(P=0\)</span>로 예측했다면 우도는 <span class="math inline">\(-\infty\)</span>가 됩니다.</p>
+<p> 우리는 보통 우도의 크기가 상대적으로 큰 지 작은 지에 대해서만 관심이 있습니다. 로그함수는 단조증가함수로 변수의 크기가 크면 로그함수의 값도 크고 작으면 로그함수의 값도 작습니다. 아래 그림에서 금방 확인하실 수 있습니다.</p>
+<pre class="r"><code>myfun_1 &lt;- function(x_var) {log(x_var)};
+ggplot(data.frame(x= c(0, 10)), aes(x=x)) + 
+  stat_function(fun = myfun_1, geom=&quot;line&quot;, size = 1.2, color = &#39;steelblue&#39;) + 
+  labs(x = &quot;X&quot;, y = &quot;Y&quot;) +
+  theme_minimal() -&gt; p_1; ggplotly(p_1)</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"data":[{"x":[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3,3.1,3.2,3.3,3.4,3.5,3.6,3.7,3.8,3.9,4,4.1,4.2,4.3,4.4,4.5,4.6,4.7,4.8,4.9,5,5.1,5.2,5.3,5.4,5.5,5.6,5.7,5.8,5.9,6,6.1,6.2,6.3,6.4,6.5,6.6,6.7,6.8,6.9,7,7.1,7.2,7.3,7.4,7.5,7.6,7.7,7.8,7.9,8,8.1,8.2,8.3,8.4,8.5,8.6,8.7,8.8,8.9,9,9.1,9.2,9.3,9.4,9.5,9.6,9.7,9.8,9.9,10],"y":[null,-2.30258509299405,-1.6094379124341,-1.20397280432594,-0.916290731874155,-0.693147180559945,-0.51082562376599,-0.356674943938732,-0.22314355131421,-0.105360515657826,0,0.0953101798043249,0.182321556793955,0.262364264467491,0.336472236621213,0.405465108108164,0.470003629245736,0.53062825106217,0.587786664902119,0.641853886172395,0.693147180559945,0.741937344729377,0.78845736036427,0.832909122935104,0.8754687373539,0.916290731874155,0.955511445027436,0.993251773010283,1.02961941718116,1.06471073699243,1.09861228866811,1.1314021114911,1.16315080980568,1.19392246847243,1.22377543162212,1.25276296849537,1.28093384546206,1.30833281965018,1.33500106673234,1.3609765531356,1.38629436111989,1.41098697371026,1.43508452528932,1.45861502269952,1.48160454092422,1.50407739677627,1.52605630349505,1.54756250871601,1.56861591791385,1.58923520511658,1.6094379124341,1.62924053973028,1.64865862558738,1.66770682055808,1.68639895357023,1.70474809223843,1.7227665977411,1.7404661748405,1.75785791755237,1.77495235091167,1.79175946922805,1.80828877117927,1.82454929205105,1.84054963339749,1.85629799036563,1.87180217690159,1.88706964903238,1.90210752639692,1.91692261218206,1.93152141160321,1.94591014905531,1.96009478404727,1.97408102602201,1.98787434815435,2.00148000021012,2.01490302054226,2.02814824729229,2.04122032885964,2.05412373369555,2.06686275947298,2.07944154167984,2.09186406167839,2.10413415427021,2.11625551480255,2.12823170584927,2.14006616349627,2.15176220325946,2.16332302566054,2.17475172148416,2.18605127673809,2.19722457733622,2.2082744135228,2.21920348405499,2.23001440015921,2.24070968927596,2.2512917986065,2.26176309847379,2.27212588550934,2.28238238567653,2.29253475714054,2.30258509299405],"text":["y:        -Inf<br />x:  0.0","y: -2.30258509<br />x:  0.1","y: -1.60943791<br />x:  0.2","y: -1.20397280<br />x:  0.3","y: -0.91629073<br />x:  0.4","y: -0.69314718<br />x:  0.5","y: -0.51082562<br />x:  0.6","y: -0.35667494<br />x:  0.7","y: -0.22314355<br />x:  0.8","y: -0.10536052<br />x:  0.9","y:  0.00000000<br />x:  1.0","y:  0.09531018<br />x:  1.1","y:  0.18232156<br />x:  1.2","y:  0.26236426<br />x:  1.3","y:  0.33647224<br />x:  1.4","y:  0.40546511<br />x:  1.5","y:  0.47000363<br />x:  1.6","y:  0.53062825<br />x:  1.7","y:  0.58778666<br />x:  1.8","y:  0.64185389<br />x:  1.9","y:  0.69314718<br />x:  2.0","y:  0.74193734<br />x:  2.1","y:  0.78845736<br />x:  2.2","y:  0.83290912<br />x:  2.3","y:  0.87546874<br />x:  2.4","y:  0.91629073<br />x:  2.5","y:  0.95551145<br />x:  2.6","y:  0.99325177<br />x:  2.7","y:  1.02961942<br />x:  2.8","y:  1.06471074<br />x:  2.9","y:  1.09861229<br />x:  3.0","y:  1.13140211<br />x:  3.1","y:  1.16315081<br />x:  3.2","y:  1.19392247<br />x:  3.3","y:  1.22377543<br />x:  3.4","y:  1.25276297<br />x:  3.5","y:  1.28093385<br />x:  3.6","y:  1.30833282<br />x:  3.7","y:  1.33500107<br />x:  3.8","y:  1.36097655<br />x:  3.9","y:  1.38629436<br />x:  4.0","y:  1.41098697<br />x:  4.1","y:  1.43508453<br />x:  4.2","y:  1.45861502<br />x:  4.3","y:  1.48160454<br />x:  4.4","y:  1.50407740<br />x:  4.5","y:  1.52605630<br />x:  4.6","y:  1.54756251<br />x:  4.7","y:  1.56861592<br />x:  4.8","y:  1.58923521<br />x:  4.9","y:  1.60943791<br />x:  5.0","y:  1.62924054<br />x:  5.1","y:  1.64865863<br />x:  5.2","y:  1.66770682<br />x:  5.3","y:  1.68639895<br />x:  5.4","y:  1.70474809<br />x:  5.5","y:  1.72276660<br />x:  5.6","y:  1.74046617<br />x:  5.7","y:  1.75785792<br />x:  5.8","y:  1.77495235<br />x:  5.9","y:  1.79175947<br />x:  6.0","y:  1.80828877<br />x:  6.1","y:  1.82454929<br />x:  6.2","y:  1.84054963<br />x:  6.3","y:  1.85629799<br />x:  6.4","y:  1.87180218<br />x:  6.5","y:  1.88706965<br />x:  6.6","y:  1.90210753<br />x:  6.7","y:  1.91692261<br />x:  6.8","y:  1.93152141<br />x:  6.9","y:  1.94591015<br />x:  7.0","y:  1.96009478<br />x:  7.1","y:  1.97408103<br />x:  7.2","y:  1.98787435<br />x:  7.3","y:  2.00148000<br />x:  7.4","y:  2.01490302<br />x:  7.5","y:  2.02814825<br />x:  7.6","y:  2.04122033<br />x:  7.7","y:  2.05412373<br />x:  7.8","y:  2.06686276<br />x:  7.9","y:  2.07944154<br />x:  8.0","y:  2.09186406<br />x:  8.1","y:  2.10413415<br />x:  8.2","y:  2.11625551<br />x:  8.3","y:  2.12823171<br />x:  8.4","y:  2.14006616<br />x:  8.5","y:  2.15176220<br />x:  8.6","y:  2.16332303<br />x:  8.7","y:  2.17475172<br />x:  8.8","y:  2.18605128<br />x:  8.9","y:  2.19722458<br />x:  9.0","y:  2.20827441<br />x:  9.1","y:  2.21920348<br />x:  9.2","y:  2.23001440<br />x:  9.3","y:  2.24070969<br />x:  9.4","y:  2.25129180<br />x:  9.5","y:  2.26176310<br />x:  9.6","y:  2.27212589<br />x:  9.7","y:  2.28238239<br />x:  9.8","y:  2.29253476<br />x:  9.9","y:  2.30258509<br />x: 10.0"],"type":"scatter","mode":"lines","line":{"width":4.53543307086614,"color":"rgba(70,130,180,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":37.2602739726027},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.5,10.5],"tickmode":"array","ticktext":["0.0","2.5","5.0","7.5","10.0"],"tickvals":[0,2.5,5,7.5,10],"categoryorder":"array","categoryarray":["0.0","2.5","5.0","7.5","10.0"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"X","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-2.53284360229345,2.53284360229345],"tickmode":"array","ticktext":["-2","-1","0","1","2"],"tickvals":[-2,-1,0,1,2],"categoryorder":"array","categoryarray":["-2","-1","0","1","2"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"Y","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"332c542d145e":{"x":{},"type":"scatter"}},"cur_data":"332c542d145e","visdat":{"332c542d145e":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> 즉, 로그함수의 값이 작으면 원래의 함수값도 작은 것이고 로그함수 값이 크면 원래의 함수값도 큰 것입니다.(비록 변화율은 차이가 나지만…) 즉, 로그함수의 값이 최대가 되는 지점이 전체 함수가 최대가 되는 지점이 됩니다. 이런 성질을 활용해 최대우도추정에 활용합니다.</p>
+</div>
+<div id="로그우도-통계량의-특징" class="section level3">
+<h3>로그우도 통계량의 특징</h3>
+<p> 앞서 알아본 로그우도 통계량은 다음곽 같은 특징들이 있습니다.</p>
+<ul>
+<li><p>로그우도 통계량은는 예측값들과 실제 관측값들에 관한 확률들의 합입니다.</p></li>
+<li><p>로그우도 통계량은 모형이 적합된 후에도 여전히 설명되지 않는 정보의 양을 나타냅니다. 이는 마치 다중회귀의 잔차제곱합(<span class="math inline">\(SSR\)</span>)과 비슷합니다. 로그가능도 통계량이 크다는 것은 설명되지 않은 관측이 많이 남아 있다는 뜻입니다.</p></li>
+<li><p>로그가능도 통계량이 큰 통계적 모형은 자료에 별로 적합하지 않다고 할 수 있습니다.</p></li>
+</ul>
+</div>
+<div id="모형의-평가-이탈도-통계량" class="section level3">
+<h3>모형의 평가: 이탈도 통계량</h3>
+<p> 로지스틱 회귀에서 이탈도는 로그우도와 아주 밀접하게 관련이 있습니다. 이탈도를 정의하는 수식은 다음과 같습니다.</p>
+<p><span class="math display">\[Logistic \ Regression \ Deviance = -2 \times LL = \sum_{i=1}^{N} \left[ -2 Y_{i} \ln(P) -2(1-Y_{i})\ln(1 - P)  \right]\]</span></p>
+<p> 로지스틱 모형을 평가하는데 있어 앞서 살펴본 로그우도를 그대로 사용하는 것보다는 이 이탈도를 사용합니다. 왜냐하면 이탈도는 카이제곱 분포를 따르기 때문입니다.</p>
+<p> 여기서 잠깐 위의 식에 대해 생각해 보겠습니다. <span class="math inline">\(Logistic \ Regression \ Deviance\)</span>는 <span class="math inline">\(Y_{i} = 1\)</span> 일때 다음의 수식이 됩니다.</p>
+<p><span class="math display">\[\sum_{i=1}^{N} \left[ -2 \ln(P) \right]\]</span></p>
+<p> 여기서 P는 0부터 1까지 변화하므로 위의 식의 값은 <span class="math inline">\(+\infty\)</span>에서 0까지 변화합니다.</p>
+<pre class="r"><code>myfun_2 &lt;- function(x_var) {-2*log(x_var)};
+ggplot(data.frame(x= c(0, 1)), aes(x=x)) + 
+  stat_function(fun = myfun_2, geom=&quot;line&quot;, size = 1.2, color = &#39;steelblue&#39;) + 
+  labs(x = &quot;P&quot;, y = &quot;Logistic Reg Deviance&quot;) +
+  theme_minimal() -&gt; p_2; ggplotly(p_2)</code></pre>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"data":[{"x":[0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.5,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.6,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.7,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.8,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,1],"y":[null,9.21034037197618,7.82404601085629,7.01311579463996,6.4377516497364,5.99146454710798,5.62682143352007,5.31852007386556,5.05145728861651,4.81589121730374,4.60517018598809,4.41454982637944,4.24052707240018,4.08044165705311,3.93222571274567,3.79423996977176,3.66516292749662,3.54391368386375,3.42959685618385,3.3214624136433,3.2188758248682,3.12129549652934,3.02825546525955,2.93935194011788,2.85423271128029,2.77258872223978,2.69414729593322,2.61866663996752,2.54593135162577,2.47574871200323,2.40794560865187,2.34236596300589,2.27886856637673,2.21732524904322,2.15761932274386,2.09964424899736,2.04330249506396,1.98850454668773,1.93516805252341,1.88321707971689,1.83258146374831,1.78319623856757,1.73500113540945,1.68794014058906,1.64196110413966,1.59701539243554,1.55305757899799,1.51004516855607,1.4679383501604,1.42669977575493,1.38629436111989,1.34668910652753,1.30785293481333,1.26975654487194,1.23237227884763,1.19567400151124,1.15963699050588,1.12423783630708,1.08945435088334,1.05526548416474,1.02165124753198,0.98859264362956,0.956071601886,0.924070919193117,0.892574205256839,0.861565832184908,0.831030887923332,0.80095513319425,0.771324961623969,0.742127362781664,0.713349887877465,0.684980617893552,0.657008133944072,0.6294214896794,0.602210185567843,0.575364144903562,0.548873691403521,0.522729528268815,0.496922718596999,0.47144466704214,0.446287102628419,0.421442062631305,0.396901877447676,0.372659156382987,0.348706774289556,0.32503785899555,0.301645779469167,0.278524134667015,0.25566674301977,0.233067632511903,0.210721031315653,0.188621358942483,0.166763217878102,0.145141385669671,0.123750807436175,0.102586588775101,0.0816439890405103,0.0609184149694171,0.0404054146350389,0.0201006717070029,-0],"text":["y:        Inf<br />x: 0.00","y: 9.21034037<br />x: 0.01","y: 7.82404601<br />x: 0.02","y: 7.01311579<br />x: 0.03","y: 6.43775165<br />x: 0.04","y: 5.99146455<br />x: 0.05","y: 5.62682143<br />x: 0.06","y: 5.31852007<br />x: 0.07","y: 5.05145729<br />x: 0.08","y: 4.81589122<br />x: 0.09","y: 4.60517019<br />x: 0.10","y: 4.41454983<br />x: 0.11","y: 4.24052707<br />x: 0.12","y: 4.08044166<br />x: 0.13","y: 3.93222571<br />x: 0.14","y: 3.79423997<br />x: 0.15","y: 3.66516293<br />x: 0.16","y: 3.54391368<br />x: 0.17","y: 3.42959686<br />x: 0.18","y: 3.32146241<br />x: 0.19","y: 3.21887582<br />x: 0.20","y: 3.12129550<br />x: 0.21","y: 3.02825547<br />x: 0.22","y: 2.93935194<br />x: 0.23","y: 2.85423271<br />x: 0.24","y: 2.77258872<br />x: 0.25","y: 2.69414730<br />x: 0.26","y: 2.61866664<br />x: 0.27","y: 2.54593135<br />x: 0.28","y: 2.47574871<br />x: 0.29","y: 2.40794561<br />x: 0.30","y: 2.34236596<br />x: 0.31","y: 2.27886857<br />x: 0.32","y: 2.21732525<br />x: 0.33","y: 2.15761932<br />x: 0.34","y: 2.09964425<br />x: 0.35","y: 2.04330250<br />x: 0.36","y: 1.98850455<br />x: 0.37","y: 1.93516805<br />x: 0.38","y: 1.88321708<br />x: 0.39","y: 1.83258146<br />x: 0.40","y: 1.78319624<br />x: 0.41","y: 1.73500114<br />x: 0.42","y: 1.68794014<br />x: 0.43","y: 1.64196110<br />x: 0.44","y: 1.59701539<br />x: 0.45","y: 1.55305758<br />x: 0.46","y: 1.51004517<br />x: 0.47","y: 1.46793835<br />x: 0.48","y: 1.42669978<br />x: 0.49","y: 1.38629436<br />x: 0.50","y: 1.34668911<br />x: 0.51","y: 1.30785293<br />x: 0.52","y: 1.26975654<br />x: 0.53","y: 1.23237228<br />x: 0.54","y: 1.19567400<br />x: 0.55","y: 1.15963699<br />x: 0.56","y: 1.12423784<br />x: 0.57","y: 1.08945435<br />x: 0.58","y: 1.05526548<br />x: 0.59","y: 1.02165125<br />x: 0.60","y: 0.98859264<br />x: 0.61","y: 0.95607160<br />x: 0.62","y: 0.92407092<br />x: 0.63","y: 0.89257421<br />x: 0.64","y: 0.86156583<br />x: 0.65","y: 0.83103089<br />x: 0.66","y: 0.80095513<br />x: 0.67","y: 0.77132496<br />x: 0.68","y: 0.74212736<br />x: 0.69","y: 0.71334989<br />x: 0.70","y: 0.68498062<br />x: 0.71","y: 0.65700813<br />x: 0.72","y: 0.62942149<br />x: 0.73","y: 0.60221019<br />x: 0.74","y: 0.57536414<br />x: 0.75","y: 0.54887369<br />x: 0.76","y: 0.52272953<br />x: 0.77","y: 0.49692272<br />x: 0.78","y: 0.47144467<br />x: 0.79","y: 0.44628710<br />x: 0.80","y: 0.42144206<br />x: 0.81","y: 0.39690188<br />x: 0.82","y: 0.37265916<br />x: 0.83","y: 0.34870677<br />x: 0.84","y: 0.32503786<br />x: 0.85","y: 0.30164578<br />x: 0.86","y: 0.27852413<br />x: 0.87","y: 0.25566674<br />x: 0.88","y: 0.23306763<br />x: 0.89","y: 0.21072103<br />x: 0.90","y: 0.18862136<br />x: 0.91","y: 0.16676322<br />x: 0.92","y: 0.14514139<br />x: 0.93","y: 0.12375081<br />x: 0.94","y: 0.10258659<br />x: 0.95","y: 0.08164399<br />x: 0.96","y: 0.06091841<br />x: 0.97","y: 0.04040541<br />x: 0.98","y: 0.02010067<br />x: 0.99","y: 0.00000000<br />x: 1.00"],"type":"scatter","mode":"lines","line":{"width":4.53543307086614,"color":"rgba(70,130,180,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":43.1050228310502},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.05,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"P","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.460517018598809,9.67085739057499],"tickmode":"array","ticktext":["0.0","2.5","5.0","7.5"],"tickvals":[0,2.5,5,7.5],"categoryorder":"array","categoryarray":["0.0","2.5","5.0","7.5"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"Logistic Reg Deviance","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"332c3f513cf0":{"x":{},"type":"scatter"}},"cur_data":"332c3f513cf0","visdat":{"332c3f513cf0":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> <span class="math inline">\(Y_{i} = 1\)</span>일때 만약 결과변수가 1이 되는 확률 <span class="math inline">\(P =1\)</span> 로 정확히 예측했다면 가장 정확히 예측한 것이고 이탈도는 0이 됩니다. 반면, <span class="math inline">\(P = 0\)</span>으로 완전 잘못 예측했다면 이탈도는 <span class="math inline">\(+\infty\)</span>가 됩니다.</p>
+<p> 반면, <span class="math inline">\(Logistic \ Regression \ Deviance\)</span>는 <span class="math inline">\(Y_{i} = 0\)</span> 일때 다음의 수식이 됩니다.</p>
+<p><span class="math display">\[\sum_{i=1}^{N} \left[ -2 \ln(1-P) \right]\]</span></p>
+<p> 이 수식은 P가 0부터 1까지 변화할 때 위의 식의 값은 0에서 <span class="math inline">\(+\infty\)</span> 까지 변화합니다.</p>
+<pre class="r"><code>myfun_3 &lt;- function(x_var) {-2*log(1 - x_var)};
+ggplot(data.frame(x= c(0, 1)), aes(x=x)) + 
+  stat_function(fun = myfun_3, geom=&quot;line&quot;, size = 1.2, color = &#39;steelblue&#39;) + 
+  labs(x = &quot;P&quot;, y = &quot;Logistic Reg Deviance&quot;) +
+  theme_minimal() -&gt; p_3; ggplotly(p_3)</code></pre>
+<div id="htmlwidget-3" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"data":[{"x":[0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.2,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.3,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.5,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.6,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.7,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.8,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,1],"y":[-0,0.0201006717070029,0.0404054146350389,0.0609184149694171,0.0816439890405103,0.102586588775101,0.123750807436175,0.145141385669671,0.166763217878102,0.188621358942483,0.210721031315653,0.233067632511903,0.25566674301977,0.278524134667015,0.301645779469167,0.32503785899555,0.348706774289556,0.372659156382987,0.396901877447676,0.421442062631305,0.446287102628419,0.47144466704214,0.496922718596999,0.522729528268815,0.548873691403521,0.575364144903562,0.602210185567843,0.6294214896794,0.657008133944072,0.684980617893552,0.713349887877465,0.742127362781664,0.77132496162397,0.800955133194251,0.831030887923332,0.861565832184909,0.892574205256839,0.924070919193117,0.956071601886,0.98859264362956,1.02165124753198,1.05526548416474,1.08945435088334,1.12423783630708,1.15963699050588,1.19567400151124,1.23237227884763,1.26975654487194,1.30785293481333,1.34668910652753,1.38629436111989,1.42669977575493,1.4679383501604,1.51004516855607,1.55305757899799,1.59701539243554,1.64196110413966,1.68794014058906,1.73500113540945,1.78319623856757,1.83258146374831,1.88321707971689,1.93516805252341,1.98850454668773,2.04330249506396,2.09964424899736,2.15761932274386,2.21732524904322,2.27886856637673,2.34236596300589,2.40794560865187,2.47574871200323,2.54593135162577,2.61866663996752,2.69414729593322,2.77258872223978,2.85423271128029,2.93935194011788,3.02825546525955,3.12129549652934,3.2188758248682,3.3214624136433,3.42959685618385,3.54391368386375,3.66516292749662,3.79423996977176,3.93222571274567,4.08044165705311,4.24052707240018,4.41454982637944,4.60517018598809,4.81589121730374,5.05145728861651,5.31852007386556,5.62682143352007,5.99146454710798,6.4377516497364,7.01311579463996,7.82404601085629,9.21034037197618,null],"text":["y: 0.00000000<br />x: 0.00","y: 0.02010067<br />x: 0.01","y: 0.04040541<br />x: 0.02","y: 0.06091841<br />x: 0.03","y: 0.08164399<br />x: 0.04","y: 0.10258659<br />x: 0.05","y: 0.12375081<br />x: 0.06","y: 0.14514139<br />x: 0.07","y: 0.16676322<br />x: 0.08","y: 0.18862136<br />x: 0.09","y: 0.21072103<br />x: 0.10","y: 0.23306763<br />x: 0.11","y: 0.25566674<br />x: 0.12","y: 0.27852413<br />x: 0.13","y: 0.30164578<br />x: 0.14","y: 0.32503786<br />x: 0.15","y: 0.34870677<br />x: 0.16","y: 0.37265916<br />x: 0.17","y: 0.39690188<br />x: 0.18","y: 0.42144206<br />x: 0.19","y: 0.44628710<br />x: 0.20","y: 0.47144467<br />x: 0.21","y: 0.49692272<br />x: 0.22","y: 0.52272953<br />x: 0.23","y: 0.54887369<br />x: 0.24","y: 0.57536414<br />x: 0.25","y: 0.60221019<br />x: 0.26","y: 0.62942149<br />x: 0.27","y: 0.65700813<br />x: 0.28","y: 0.68498062<br />x: 0.29","y: 0.71334989<br />x: 0.30","y: 0.74212736<br />x: 0.31","y: 0.77132496<br />x: 0.32","y: 0.80095513<br />x: 0.33","y: 0.83103089<br />x: 0.34","y: 0.86156583<br />x: 0.35","y: 0.89257421<br />x: 0.36","y: 0.92407092<br />x: 0.37","y: 0.95607160<br />x: 0.38","y: 0.98859264<br />x: 0.39","y: 1.02165125<br />x: 0.40","y: 1.05526548<br />x: 0.41","y: 1.08945435<br />x: 0.42","y: 1.12423784<br />x: 0.43","y: 1.15963699<br />x: 0.44","y: 1.19567400<br />x: 0.45","y: 1.23237228<br />x: 0.46","y: 1.26975654<br />x: 0.47","y: 1.30785293<br />x: 0.48","y: 1.34668911<br />x: 0.49","y: 1.38629436<br />x: 0.50","y: 1.42669978<br />x: 0.51","y: 1.46793835<br />x: 0.52","y: 1.51004517<br />x: 0.53","y: 1.55305758<br />x: 0.54","y: 1.59701539<br />x: 0.55","y: 1.64196110<br />x: 0.56","y: 1.68794014<br />x: 0.57","y: 1.73500114<br />x: 0.58","y: 1.78319624<br />x: 0.59","y: 1.83258146<br />x: 0.60","y: 1.88321708<br />x: 0.61","y: 1.93516805<br />x: 0.62","y: 1.98850455<br />x: 0.63","y: 2.04330250<br />x: 0.64","y: 2.09964425<br />x: 0.65","y: 2.15761932<br />x: 0.66","y: 2.21732525<br />x: 0.67","y: 2.27886857<br />x: 0.68","y: 2.34236596<br />x: 0.69","y: 2.40794561<br />x: 0.70","y: 2.47574871<br />x: 0.71","y: 2.54593135<br />x: 0.72","y: 2.61866664<br />x: 0.73","y: 2.69414730<br />x: 0.74","y: 2.77258872<br />x: 0.75","y: 2.85423271<br />x: 0.76","y: 2.93935194<br />x: 0.77","y: 3.02825547<br />x: 0.78","y: 3.12129550<br />x: 0.79","y: 3.21887582<br />x: 0.80","y: 3.32146241<br />x: 0.81","y: 3.42959686<br />x: 0.82","y: 3.54391368<br />x: 0.83","y: 3.66516293<br />x: 0.84","y: 3.79423997<br />x: 0.85","y: 3.93222571<br />x: 0.86","y: 4.08044166<br />x: 0.87","y: 4.24052707<br />x: 0.88","y: 4.41454983<br />x: 0.89","y: 4.60517019<br />x: 0.90","y: 4.81589122<br />x: 0.91","y: 5.05145729<br />x: 0.92","y: 5.31852007<br />x: 0.93","y: 5.62682143<br />x: 0.94","y: 5.99146455<br />x: 0.95","y: 6.43775165<br />x: 0.96","y: 7.01311579<br />x: 0.97","y: 7.82404601<br />x: 0.98","y: 9.21034037<br />x: 0.99","y:        Inf<br />x: 1.00"],"type":"scatter","mode":"lines","line":{"width":4.53543307086614,"color":"rgba(70,130,180,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":43.1050228310502},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.05,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"P","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.460517018598809,9.67085739057499],"tickmode":"array","ticktext":["0.0","2.5","5.0","7.5"],"tickvals":[0,2.5,5,7.5],"categoryorder":"array","categoryarray":["0.0","2.5","5.0","7.5"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"Logistic Reg Deviance","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"332c662da16":{"x":{},"type":"scatter"}},"cur_data":"332c662da16","visdat":{"332c662da16":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> <span class="math inline">\(Y_{i} = 0\)</span>일때 만약 결과변수가 1이 되는 확률 <span class="math inline">\(P =1\)</span> 로 완전히 잘못 예측했다면 이탈도는 <span class="math inline">\(+\infty\)</span>가 됩니다. 반면 확률 <span class="math inline">\(P =0\)</span> 로 가장 정확히 예측했다면 이탈도는 0이 됩니다.</p>
+<p> 다중회귀에서는 흔히 모든 점수의 평균을 기저 모형으로 사용합니다. 다른 어떤 정보도 없는 상태에서 결과를 예측하기 위해 사용할 수 있는 최선의 모형이 평균이기 때문입니다. 그런데 로지스틱 회귀에서는 결과변수가 0과 1로만 구성되어 있어 평균을 기저모형을 사용하기 제한됩니다. 0과 1 이외의 0.5와 같은 결과값이 애당초 존재하지 않기 때문입니다.</p>
+<p> 그래서 기저모형은 0과 1중 빈도가 가장 높은 것으로 간주해 버립니다. 만약 총 사례가 100개인데 그 중 0이 49개, 1이 51개라면 기저모형은 모든 값들이 1이라고 가정한 모델이 됩니다. 즉, <strong>다중회귀에서는 평균이 기저 모형이었지만 로지스틱 회귀에서는 가장 자주 발생한 결과가 기저모형입니다.</strong></p>
+<p> 기저모형에 더 많은 예측변수를 추가함으로써 모형을 좀 더 개선할 수 있습니다.</p>
+<p><span class="math display">\[  \chi^{2} = (-2LL(based \ model)) - (-2LL(new \ model)) \]</span></p>
+<p><span class="math display">\[  \chi^{2} = 2LL(new \ model) - 2LL(based \ model) \]</span></p>
+<p><span class="math display">\[ df = k_{new \ model}  - k_{based \ model}\]</span></p>
+<p> 카이제곱은 새 모형의 이탈도에서 기저 모형의 이탈도를 뺀 값입니다. 이 차이를 가능도비(likelihood ratio)라고 합니다. df는 자유도인데 새 모형의 매개 변수에서 기저 모형의 매개변수 개수를 뺀 것입니다. <strong>가능도비는 자유도가 <span class="math inline">\(df\)</span>인 카이제곱 분포를 따릅니다.</strong></p>
+<p> R에서 로지스틱 회귀를 수행하면 결과값에 Null deviance와 Residual deviance가 출력됩니다. 이 때 Null deviance는 모형을 적합하기 전에 deviance이고 Residual deviance는 모형을 적합한 후의 deviance입니다. 이 둘 사이가 충분히 줄었다면 모형이 적합하다도 보게됩니다. deviance의 차이가 카이제곱 분포를 따르기에 통계적으로 유의한 차이인지 여부를 알 수 있습니다.</p>
+<p> 만약 예를 들어, deviance의 차이가 11.2가 나왔고 이 때 자유도가 1이었다고 한다면 이것의 p-value는 다음과 같은 코드로 구합니다.</p>
+<pre class="r"><code>1 - pchisq(11.2, 1)</code></pre>
+<pre><code>## [1] 0.0008179733</code></pre>
+<p> 이 값이 &lt; .05이므로 통계적으로 유의합니다. 이럴 경우 모델이 적합되었다고 판단하게 됩니다.</p>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

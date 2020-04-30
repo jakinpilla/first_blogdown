@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.69.0" />
+
+
+<title>Adult Census Income Dataset EDA 1 (7 variables) - My DataScience Blog</title>
+<meta property="og:title" content="Adult Census Income Dataset EDA 1 (7 variables) - My DataScience Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">Daniel Kim</a></li>
+    
+    <li><a href="https://github.com/jakinpilla">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/jakinpilla">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">12 min read</span>
+    
+
+    <h1 class="article-title">Adult Census Income Dataset EDA 1 (7 variables)</h1>
+
+    
+    <span class="article-date">2020-04-30</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<div id="data-loading" class="section level2">
+<h2>Data Loading</h2>
+<p> 이번 포스트에서는 Adult 라는 데이터에 대해 탐험해보려 합니다. 왜 EDA를 하려고 하냐면 이 데이터를 가지고 추후 로지스틱 회귀분석을 해 보려 하기 때문입니다. 이 Adult 데이터는 인구통계학적으로 수입에 대한 주제를 고찰해 볼 수 있는 데이터입니다. Adult Census Income 데이터라고도 합니다.</p>
+<p> 먼저 데이터를 받으셔야 합니다. 항상 분석의 첫 단계는 데이터를 수집하는 일입니다. 그런데 이것이 실무에선 여간 만만한 일이 아닙니다. 대부분 분석을 위한 데이터들은 보안이라는 벽 때문에 직접 접근이 어렵고 막상 수많은 행정절차를 걸쳐 데이터를 만질 수 있는 곳에 입성(?)하게 되더라도 정말 말도 안되게 마구 DB에 쑤셔넣어진 쓰레기 데이터들과 만나게 되는 것이 현실입니다. 바로 그러한 좌절 속에서 데이터 전처리를 해 분석을 할 수 있는 데이터를 얻게 된다는 것은 데이터 분석가에겐 천국을 만난 기분이 들게 하는 일입니다.</p>
+<p> 이번 포스트에선 그런 전처리가 말끔하게 이미 다 되어있는 데이터를 가지고 하는 간단한 로지스틱 회귀분석을 해보려 합니다. <a href="https://archive.ics.uci.edu/ml/index.php">UCI Machine Learning</a> 이라는 사이트에서 Adult 데이터를 받아보도록 하겠습니다.</p>
+<p> 다음의 코드를 실행하면 adult라는 데이터를 다운받아 adult.csv 파일로 저장할 수 있습니다.</p>
+<pre><code>adult &lt;- read.csv(&#39;https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data&#39;, 
+                  header = F, 
+                  strip.white = T)
+
+names(adult) &lt;- c(&#39;age&#39;, &#39;workclass&#39;, &#39;fnlwgt&#39;, &#39;education&#39;, &#39;education_num&#39;, &#39;marital_status&#39;, 
+                  &#39;occupation&#39;, &#39;relationship&#39;, &#39;race&#39;, &#39;sex&#39;, &#39;capital_gain&#39;, &#39;capital_loss&#39;, 
+                  &#39;hours_per_week&#39;, &#39;native_country&#39;, &#39;wage&#39;)
+
+adult %&gt;% write_csv(&#39;adult.csv&#39;)</code></pre>
+<p> 저장된 데이터를 불러와 adult라는 변수에 담아보겠습니다. 그리고 adult 데이터의 대략적인 구조도 glimpse() 함수를 사용해 알아보겠습니다.</p>
+<pre class="r"><code>adult &lt;- read_csv(&#39;adult.csv&#39;)
+adult %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 32,561
+## Variables: 15
+## $ age            &lt;dbl&gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...
+## $ workclass      &lt;chr&gt; &quot;State-gov&quot;, &quot;Self-emp-not-inc&quot;, &quot;Private&quot;, &quot;Private...
+## $ fnlwgt         &lt;dbl&gt; 77516, 83311, 215646, 234721, 338409, 284582, 160187...
+## $ education      &lt;chr&gt; &quot;Bachelors&quot;, &quot;Bachelors&quot;, &quot;HS-grad&quot;, &quot;11th&quot;, &quot;Bachel...
+## $ education_num  &lt;dbl&gt; 13, 13, 9, 7, 13, 14, 5, 9, 14, 13, 10, 13, 13, 12, ...
+## $ marital_status &lt;chr&gt; &quot;Never-married&quot;, &quot;Married-civ-spouse&quot;, &quot;Divorced&quot;, &quot;...
+## $ occupation     &lt;chr&gt; &quot;Adm-clerical&quot;, &quot;Exec-managerial&quot;, &quot;Handlers-cleaner...
+## $ relationship   &lt;chr&gt; &quot;Not-in-family&quot;, &quot;Husband&quot;, &quot;Not-in-family&quot;, &quot;Husban...
+## $ race           &lt;chr&gt; &quot;White&quot;, &quot;White&quot;, &quot;White&quot;, &quot;Black&quot;, &quot;Black&quot;, &quot;White&quot;...
+## $ sex            &lt;chr&gt; &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Female&quot;, &quot;Female&quot;, ...
+## $ capital_gain   &lt;dbl&gt; 2174, 0, 0, 0, 0, 0, 0, 0, 14084, 5178, 0, 0, 0, 0, ...
+## $ capital_loss   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+## $ hours_per_week &lt;dbl&gt; 40, 13, 40, 40, 40, 40, 16, 45, 50, 40, 80, 40, 30, ...
+## $ native_country &lt;chr&gt; &quot;United-States&quot;, &quot;United-States&quot;, &quot;United-States&quot;, &quot;...
+## $ wage           &lt;chr&gt; &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;...</code></pre>
+<pre class="r"><code>adult$occupation &lt;- as.character(adult$occupation)</code></pre>
+<p> 이 데이터는 모두 32,561명의 성인들에 대한 데이터입니다. 총 변수의 개수는 15개입니다.</p>
+</div>
+<div id="eda" class="section level2">
+<h2>EDA</h2>
+<div id="age" class="section level3">
+<h3>age</h3>
+<p> 먼저 첫 번째 변수인 age부터 고찰해 보겠습니다. age는 나이입니다.</p>
+<pre class="r"><code> adult %&gt;% 
+  ggplot(aes(x = 0, y = age)) + geom_jitter(color = &#39;steelblue&#39;, alpha = .3) + geom_boxplot(alpha = .5) +
+  stat_summary(geom=&quot;text&quot;, fun.y=quantile,
+               aes(label=sprintf(&quot;%1.1f&quot;, ..y..)),
+               position=position_nudge(x=0.33), 
+               size=4.5) +
+  ylab(&quot;Age(나이)&quot;) +
+  theme_minimal() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) -&gt; p1
+
+adult %&gt;%
+  ggplot(aes(age)) + geom_histogram(fill = &quot;steelblue&quot;, colour = &#39;white&#39;) + 
+  xlab(&quot;Age(나이)&quot;) + theme_minimal() -&gt; p2
+
+grid.arrange(p1, p2, ncol = 2, widths = c(.4, .6))</code></pre>
+<p><img src="/post/2020-04-27-Adult_Census_Data_EDA_1_files/figure-html/unnamed-chunk-3-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p> 사분위수 중 Q1(lower quartile)은 28세이고 Q3(upper quartile)은 48세입니다. Q2(median)은 37세입니다. 대략 주로 많은 데이터가 25~45세 사이에 분포되어 있습니다. 특이하게도 90세가 되는 데이터가 히스토그램 꼬리부분에서 발견되어지네요…</p>
+<p> 이제 나이와 중산층 여부와의 관계를 시각화해 보겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(age,fill = wage)) +
+  geom_histogram( colour = &#39;white&#39;) + 
+  scale_fill_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() + theme(legend.position = &#39;none&#39;) -&gt; p1</code></pre>
+<pre class="r"><code>adult %&gt;%
+  ggplot(aes(age, fill=wage)) +
+  geom_density(alpha = .5) +
+  scale_fill_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p2
+
+grid.arrange(p1, p2, ncol = 2, widths = c(.45, .55))</code></pre>
+<p><img src="/post/2020-04-27-Adult_Census_Data_EDA_1_files/figure-html/unnamed-chunk-5-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p> 물론 전체적으로 <span class="math inline">\(&lt;=50K\)</span>인 사람들이 <span class="math inline">\(&gt;50K\)</span>인사람들보다 많지만 오른쪽 그래프에서 볼 수 있듯이 나이에 따른 밀도분포의 상대적인 크기는 서로 다릅니다. 약 30대 초반부터 60대 초반 까진 중산층 이상의 수입을 얻는 사람들의 나이에 대한 상대적인 비율이 더 많습니다. 하지만 60대 초반 이후부터는 중산층 이상의 소득을 얻는 사람들의 비율이 그렇지 못한 사람들의 비율보다 더 낮습니다.</p>
+</div>
+<div id="workclass" class="section level3">
+<h3>workclass</h3>
+<p> 두 변째 변수는 <code>workclass</code> 입니다. 먼저 얼마나 많은 종류의 workclass가 있고 각각의 종류의 빈도는 얼마나 되는지 알아보도록 하겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  filter(workclass != &#39;?&#39;) %&gt;% # 데이터에 &#39;?&#39;가 있어 제외시켰습니다.
+  count(workclass) -&gt; work_class_freq_df ; work_class_freq_df</code></pre>
+<pre><code>## # A tibble: 8 x 2
+##   workclass            n
+##   &lt;chr&gt;            &lt;int&gt;
+## 1 Federal-gov        960
+## 2 Local-gov         2093
+## 3 Never-worked         7
+## 4 Private          22696
+## 5 Self-emp-inc      1116
+## 6 Self-emp-not-inc  2541
+## 7 State-gov         1298
+## 8 Without-pay         14</code></pre>
+<pre class="r"><code>work_class_freq_df %&gt;%
+  ggplot(aes(workclass, n)) + geom_bar(stat = &#39;identity&#39;, fill = &#39;steelblue&#39;) + coord_flip() + theme_minimal()</code></pre>
+<p><img src="/post/2020-04-27-Adult_Census_Data_EDA_1_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> <code>Private</code>이라는 workclass가 가장 많네요. Private…?? 무슨 의미지?? 일반적인 사기업을 다니는 사람들이 제일 많다는 것인가? 궁금하지만 분석을 위해 넘어가도록 하겠습니다. 다음에 시간이 허락하면 무슨 뜻인지 찾아보도록 하겠습니다.</p>
+<p>  그런데 이렇게 보니까 각 workclass에서 income이 <span class="math inline">\(&gt;50K\)</span>가 얼마나 많은 비율을 보이는가가 궁금해 졌습니다. 이를 시각화 해보도록 하겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  filter(workclass != &#39;?&#39;) %&gt;% # 데이터에 &#39;?&#39;가 있어 제외시켰습니다.
+  count(workclass, wage) %&gt;%
+  group_by(workclass) %&gt;%
+  mutate(per_group_sum = sum(n)) %&gt;%
+  mutate(y_label = n/per_group_sum*100) %&gt;%
+  mutate(y_label = round(y_label, 1)) -&gt; df_1
+
+df_1 %&gt;%
+  mutate(v_adjust = ifelse(wage == &quot;&lt;=50K&quot;, n+1500, n-1500)) -&gt; df_2
+
+df_2 %&gt;%
+  ggplot(aes(workclass, n, fill = wage)) + geom_bar(stat = &#39;identity&#39;) + 
+  geom_text(aes(y = v_adjust, label = y_label), vjust = 0, colour = &#39;black&#39;, angle = 0) +
+  theme_minimal() +
+  scale_fill_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  coord_flip() -&gt; p5; ggplotly(p5)</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.899999999999999],"base":[371,617,0,4963,622,724,353,0],"x":[589,1476,7,17733,494,1817,945,14],"y":[1,2,3,4,5,6,7,8],"text":["workclass: Federal-gov<br />n:   589<br />wage: <=50K","workclass: Local-gov<br />n:  1476<br />wage: <=50K","workclass: Never-worked<br />n:     7<br />wage: <=50K","workclass: Private<br />n: 17733<br />wage: <=50K","workclass: Self-emp-inc<br />n:   494<br />wage: <=50K","workclass: Self-emp-not-inc<br />n:  1817<br />wage: <=50K","workclass: State-gov<br />n:   945<br />wage: <=50K","workclass: Without-pay<br />n:    14<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9],"base":[0,0,0,0,0,0],"x":[371,617,4963,622,724,353],"y":[1,2,4,5,6,7],"text":["workclass: Federal-gov<br />n:   371<br />wage: >50K","workclass: Local-gov<br />n:   617<br />wage: >50K","workclass: Private<br />n:  4963<br />wage: >50K","workclass: Self-emp-inc<br />n:   622<br />wage: >50K","workclass: Self-emp-not-inc<br />n:   724<br />wage: >50K","workclass: State-gov<br />n:   353<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2089,2976,1507,19233,1994,3317,2445,1514],"y":[1,2,3,4,5,6,7,8],"text":[61.4,70.5,100,78.1,44.3,71.5,72.8,100],"hovertext":["v_adjust:  2089<br />y_label:  61.4<br />workclass: Federal-gov<br />n:  2089<br />wage: <=50K","v_adjust:  2976<br />y_label:  70.5<br />workclass: Local-gov<br />n:  2976<br />wage: <=50K","v_adjust:  1507<br />y_label: 100.0<br />workclass: Never-worked<br />n:  1507<br />wage: <=50K","v_adjust: 19233<br />y_label:  78.1<br />workclass: Private<br />n: 19233<br />wage: <=50K","v_adjust:  1994<br />y_label:  44.3<br />workclass: Self-emp-inc<br />n:  1994<br />wage: <=50K","v_adjust:  3317<br />y_label:  71.5<br />workclass: Self-emp-not-inc<br />n:  3317<br />wage: <=50K","v_adjust:  2445<br />y_label:  72.8<br />workclass: State-gov<br />n:  2445<br />wage: <=50K","v_adjust:  1514<br />y_label: 100.0<br />workclass: Without-pay<br />n:  1514<br />wage: <=50K"],"textfont":{"size":14.6645669291339,"color":"rgba(0,0,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"<=50K","legendgroup":"<=50K","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-1129,-883,3463,-878,-776,-1147],"y":[1,2,4,5,6,7],"text":[38.6,29.5,21.9,55.7,28.5,27.2],"hovertext":["v_adjust: -1129<br />y_label:  38.6<br />workclass: Federal-gov<br />n: -1129<br />wage: >50K","v_adjust:  -883<br />y_label:  29.5<br />workclass: Local-gov<br />n:  -883<br />wage: >50K","v_adjust:  3463<br />y_label:  21.9<br />workclass: Private<br />n:  3463<br />wage: >50K","v_adjust:  -878<br />y_label:  55.7<br />workclass: Self-emp-inc<br />n:  -878<br />wage: >50K","v_adjust:  -776<br />y_label:  28.5<br />workclass: Self-emp-not-inc<br />n:  -776<br />wage: >50K","v_adjust: -1147<br />y_label:  27.2<br />workclass: State-gov<br />n: -1147<br />wage: >50K"],"textfont":{"size":14.6645669291339,"color":"rgba(0,0,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":">50K","legendgroup":">50K","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":119.086757990868},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-2339.15,23888.15],"tickmode":"array","ticktext":["0","5000","10000","15000","20000"],"tickvals":[0,5000,10000,15000,20000],"categoryorder":"array","categoryarray":["0","5000","10000","15000","20000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"n","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,8.6],"tickmode":"array","ticktext":["Federal-gov","Local-gov","Never-worked","Private","Self-emp-inc","Self-emp-not-inc","State-gov","Without-pay"],"tickvals":[1,2,3,4,5,6,7,8],"categoryorder":"array","categoryarray":["Federal-gov","Local-gov","Never-worked","Private","Self-emp-inc","Self-emp-not-inc","State-gov","Without-pay"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"workclass","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"6cf43cfc310":{"x":{},"y":{},"fill":{},"type":"bar"},"6cf46eb01b5f":{"y":{},"label":{},"x":{},"y.1":{},"fill":{}}},"cur_data":"6cf43cfc310","visdat":{"6cf43cfc310":["function (y) ","x"],"6cf46eb01b5f":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>df_1 %&gt;%
+  ggplot(aes(workclass, n, fill = wage)) + geom_bar(stat = &#39;identity&#39;, position = &#39;fill&#39;) +
+  theme_minimal() +
+  geom_text(aes(y = n, label = y_label), vjust = 0, colour = &#39;black&#39;, position = position_fill(vjust = .5)) +
+  scale_fill_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  coord_flip() -&gt; p6; ggplotly(p6)</code></pre>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.899999999999999],"base":[0.386458333333333,0.294792164357382,0,0.218672893902009,0.557347670250896,0.284927194018103,0.271956856702619,0],"x":[0.613541666666667,0.705207835642618,1,0.781327106097991,0.442652329749104,0.715072805981897,0.728043143297381,1],"y":[1,2,3,4,5,6,7,8],"text":["workclass: Federal-gov<br />n: 0.6135417<br />wage: <=50K","workclass: Local-gov<br />n: 0.7052078<br />wage: <=50K","workclass: Never-worked<br />n: 1.0000000<br />wage: <=50K","workclass: Private<br />n: 0.7813271<br />wage: <=50K","workclass: Self-emp-inc<br />n: 0.4426523<br />wage: <=50K","workclass: Self-emp-not-inc<br />n: 0.7150728<br />wage: <=50K","workclass: State-gov<br />n: 0.7280431<br />wage: <=50K","workclass: Without-pay<br />n: 1.0000000<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9],"base":[0,0,0,0,0,0],"x":[0.386458333333333,0.294792164357382,0.218672893902009,0.557347670250896,0.284927194018103,0.271956856702619],"y":[1,2,4,5,6,7],"text":["workclass: Federal-gov<br />n: 0.3864583<br />wage: >50K","workclass: Local-gov<br />n: 0.2947922<br />wage: >50K","workclass: Private<br />n: 0.2186729<br />wage: >50K","workclass: Self-emp-inc<br />n: 0.5573477<br />wage: >50K","workclass: Self-emp-not-inc<br />n: 0.2849272<br />wage: >50K","workclass: State-gov<br />n: 0.2719569<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.693229166666667,0.647396082178691,0.5,0.609336446951005,0.778673835125448,0.642463597009052,0.63597842835131,0.5],"y":[1,2,3,4,5,6,7,8],"text":[61.4,70.5,100,78.1,44.3,71.5,72.8,100],"hovertext":["n:   589<br />y_label:  61.4<br />workclass: Federal-gov<br />n:   589<br />wage: <=50K","n:  1476<br />y_label:  70.5<br />workclass: Local-gov<br />n:  1476<br />wage: <=50K","n:     7<br />y_label: 100.0<br />workclass: Never-worked<br />n:     7<br />wage: <=50K","n: 17733<br />y_label:  78.1<br />workclass: Private<br />n: 17733<br />wage: <=50K","n:   494<br />y_label:  44.3<br />workclass: Self-emp-inc<br />n:   494<br />wage: <=50K","n:  1817<br />y_label:  71.5<br />workclass: Self-emp-not-inc<br />n:  1817<br />wage: <=50K","n:   945<br />y_label:  72.8<br />workclass: State-gov<br />n:   945<br />wage: <=50K","n:    14<br />y_label: 100.0<br />workclass: Without-pay<br />n:    14<br />wage: <=50K"],"textfont":{"size":14.6645669291339,"color":"rgba(0,0,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"<=50K","legendgroup":"<=50K","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.193229166666667,0.147396082178691,0.109336446951005,0.278673835125448,0.142463597009052,0.13597842835131],"y":[1,2,4,5,6,7],"text":[38.6,29.5,21.9,55.7,28.5,27.2],"hovertext":["n:   371<br />y_label:  38.6<br />workclass: Federal-gov<br />n:   371<br />wage: >50K","n:   617<br />y_label:  29.5<br />workclass: Local-gov<br />n:   617<br />wage: >50K","n:  4963<br />y_label:  21.9<br />workclass: Private<br />n:  4963<br />wage: >50K","n:   622<br />y_label:  55.7<br />workclass: Self-emp-inc<br />n:   622<br />wage: >50K","n:   724<br />y_label:  28.5<br />workclass: Self-emp-not-inc<br />n:   724<br />wage: >50K","n:   353<br />y_label:  27.2<br />workclass: State-gov<br />n:   353<br />wage: >50K"],"textfont":{"size":14.6645669291339,"color":"rgba(0,0,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":">50K","legendgroup":">50K","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":119.086757990868},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.05,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"n","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,8.6],"tickmode":"array","ticktext":["Federal-gov","Local-gov","Never-worked","Private","Self-emp-inc","Self-emp-not-inc","State-gov","Without-pay"],"tickvals":[1,2,3,4,5,6,7,8],"categoryorder":"array","categoryarray":["Federal-gov","Local-gov","Never-worked","Private","Self-emp-inc","Self-emp-not-inc","State-gov","Without-pay"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"workclass","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"6cf4f9c4e0f":{"x":{},"y":{},"fill":{},"type":"bar"},"6cf45d82446d":{"y":{},"label":{},"x":{},"y.1":{},"fill":{}}},"cur_data":"6cf4f9c4e0f","visdat":{"6cf4f9c4e0f":["function (y) ","x"],"6cf45d82446d":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> <code>Self-emp-inc</code> 인 workclass에서 <span class="math inline">\(&gt;50K\)</span>인 비율이 가장 높게 나타납니다.</p>
+</div>
+<div id="fnlwgt" class="section level3">
+<h3>fnlwgt</h3>
+<p> <code>fnlwgt</code>는 <code>final weight</code>의 약자입니다. 각각의 데이터들이 전체 인구수를 고려했을때 곱해질 수 있는 가중치를 의미합니다. <code>fnlwgt</code>를 모두 더해볼까요?</p>
+<pre class="r"><code>adult$fnlwgt %&gt;% sum()</code></pre>
+<pre><code>## [1] 6179373392</code></pre>
+<p> 6,179,373,392 약 62억이 되는 수인데 연구자는 이를 전체 인구수로 보았던 것 같습니다. 첫 번째 데이터의 fnlwgt는 77,516인데 이는 나이가 39세이고 국가직 공무원이며 학사 학위를 가지고 미혼인 남성 등등의 조건을 가진 사람의 전체 인구수 고려한 가중치를 77,516로 두었음을 의미합니다.</p>
+<pre class="r"><code>adult$fnlwgt[1]</code></pre>
+<pre><code>## [1] 77516</code></pre>
+<pre class="r"><code>adult[1, ]</code></pre>
+<pre><code>## # A tibble: 1 x 15
+##     age workclass fnlwgt education education_num marital_status occupation
+##   &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;     
+## 1    39 State-gov  77516 Bachelors            13 Never-married  Adm-cleri~
+## # ... with 8 more variables: relationship &lt;chr&gt;, race &lt;chr&gt;, sex &lt;chr&gt;,
+## #   capital_gain &lt;dbl&gt;, capital_loss &lt;dbl&gt;, hours_per_week &lt;dbl&gt;,
+## #   native_country &lt;chr&gt;, wage &lt;chr&gt;</code></pre>
+<p> 그런데 우리의 추후 목적은 <code>wage</code>라는 변수를 예측하는 것입니다. 상식적으로 인구통계학적 가중치가 이를 예측하는데 그리 도룸이 될 것 같지는 않습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  mutate(wage_num = ifelse(wage == &quot;&lt;=50K&quot;, 0, 1)) -&gt; df_test
+
+cor(df_test$wage_num, adult$fnlwgt)</code></pre>
+<pre><code>## [1] -0.009462557</code></pre>
+<p> 위의 결과에서 보듯이 <code>wage</code>와 <code>fnlwgt</code>과의 상관계수를 알아보면 거의 0입니다. 그래서 이 변수를 분석에 그리 도움이 되지 않을 것입니다. 이 변수를 데이터에서 제외시키도록 하겠습니다.</p>
+<pre class="r"><code>adult$fnlwgt &lt;- NULL</code></pre>
+</div>
+<div id="education-education_num" class="section level3">
+<h3>education &amp; education_num</h3>
+<p> 다음으로는 <code>education</code> 변수와 <code>education_num</code>에 대해 알아보겠습니다.</p>
+<pre class="r"><code>adult$education %&gt;% unique()</code></pre>
+<pre><code>##  [1] &quot;Bachelors&quot;    &quot;HS-grad&quot;      &quot;11th&quot;         &quot;Masters&quot;      &quot;9th&quot;         
+##  [6] &quot;Some-college&quot; &quot;Assoc-acdm&quot;   &quot;Assoc-voc&quot;    &quot;7th-8th&quot;      &quot;Doctorate&quot;   
+## [11] &quot;Prof-school&quot;  &quot;5th-6th&quot;      &quot;10th&quot;         &quot;1st-4th&quot;      &quot;Preschool&quot;   
+## [16] &quot;12th&quot;</code></pre>
+<pre class="r"><code>adult$education_num %&gt;% unique()</code></pre>
+<pre><code>##  [1] 13  9  7 14  5 10 12 11  4 16 15  3  6  2  1  8</code></pre>
+<p> <code>education</code> 변수와 <code>education_num</code> 변수는 학위등급과 학년에 대한 정보입니다. 이 둘은 서로 매칭이 되어 있습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  select(education, education_num) %&gt;%
+  distinct() %&gt;%
+  arrange(education_num) -&gt; df_tmp; df_tmp</code></pre>
+<pre><code>## # A tibble: 16 x 2
+##    education    education_num
+##    &lt;chr&gt;                &lt;dbl&gt;
+##  1 Preschool                1
+##  2 1st-4th                  2
+##  3 5th-6th                  3
+##  4 7th-8th                  4
+##  5 9th                      5
+##  6 10th                     6
+##  7 11th                     7
+##  8 12th                     8
+##  9 HS-grad                  9
+## 10 Some-college            10
+## 11 Assoc-voc               11
+## 12 Assoc-acdm              12
+## 13 Bachelors               13
+## 14 Masters                 14
+## 15 Prof-school             15
+## 16 Doctorate               16</code></pre>
+<p> 일단 <code>education</code> 범주형 번수의 순서가 엉망이네요…이를 해결하게 위해 범주형 변수의 <code>level</code>를 재지정해야 합니다. 아래와 같은 순서로 재지정하려 합니다.</p>
+<pre class="r"><code>lev_nm &lt;- df_tmp$education %&gt;% as.character()
+lev_nm</code></pre>
+<pre><code>##  [1] &quot;Preschool&quot;    &quot;1st-4th&quot;      &quot;5th-6th&quot;      &quot;7th-8th&quot;      &quot;9th&quot;         
+##  [6] &quot;10th&quot;         &quot;11th&quot;         &quot;12th&quot;         &quot;HS-grad&quot;      &quot;Some-college&quot;
+## [11] &quot;Assoc-voc&quot;    &quot;Assoc-acdm&quot;   &quot;Bachelors&quot;    &quot;Masters&quot;      &quot;Prof-school&quot; 
+## [16] &quot;Doctorate&quot;</code></pre>
+<pre class="r"><code>adult$education &lt;- factor(adult$education, levels = lev_nm)
+adult$education %&gt;% head()</code></pre>
+<pre><code>## [1] Bachelors Bachelors HS-grad   11th      Bachelors Masters  
+## 16 Levels: Preschool 1st-4th 5th-6th 7th-8th 9th 10th 11th 12th ... Doctorate</code></pre>
+<p> 레벨이 잘 지정되어진 것 같습니다.^^</p>
+<p> 위애서 해 보았던 것처럼 각 학위등급 및 중산층 여부의 빈도 분포를 막대그래프를 이용해 표현해보도록 하겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  count(education, wage) %&gt;%
+  ggplot(aes(education, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Persons&quot;) +
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  coord_flip() -&gt; p; ggplotly(p)</code></pre>
+<div id="htmlwidget-3" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999],"base":[0,6,16,40,27,62,60,33,1675,1387,361,265,2221,959,423,306],"x":[51,162,317,606,487,871,1115,400,8826,5904,1021,802,3134,764,153,107],"y":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"text":["education: Preschool<br />n:   51<br />wage: <=50K","education: 1st-4th<br />n:  162<br />wage: <=50K","education: 5th-6th<br />n:  317<br />wage: <=50K","education: 7th-8th<br />n:  606<br />wage: <=50K","education: 9th<br />n:  487<br />wage: <=50K","education: 10th<br />n:  871<br />wage: <=50K","education: 11th<br />n: 1115<br />wage: <=50K","education: 12th<br />n:  400<br />wage: <=50K","education: HS-grad<br />n: 8826<br />wage: <=50K","education: Some-college<br />n: 5904<br />wage: <=50K","education: Assoc-voc<br />n: 1021<br />wage: <=50K","education: Assoc-acdm<br />n:  802<br />wage: <=50K","education: Bachelors<br />n: 3134<br />wage: <=50K","education: Masters<br />n:  764<br />wage: <=50K","education: Prof-school<br />n:  153<br />wage: <=50K","education: Doctorate<br />n:  107<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999],"base":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"x":[6,16,40,27,62,60,33,1675,1387,361,265,2221,959,423,306],"y":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"text":["education: 1st-4th<br />n:    6<br />wage: >50K","education: 5th-6th<br />n:   16<br />wage: >50K","education: 7th-8th<br />n:   40<br />wage: >50K","education: 9th<br />n:   27<br />wage: >50K","education: 10th<br />n:   62<br />wage: >50K","education: 11th<br />n:   60<br />wage: >50K","education: 12th<br />n:   33<br />wage: >50K","education: HS-grad<br />n: 1675<br />wage: >50K","education: Some-college<br />n: 1387<br />wage: >50K","education: Assoc-voc<br />n:  361<br />wage: >50K","education: Assoc-acdm<br />n:  265<br />wage: >50K","education: Bachelors<br />n: 2221<br />wage: >50K","education: Masters<br />n:  959<br />wage: >50K","education: Prof-school<br />n:  423<br />wage: >50K","education: Doctorate<br />n:  306<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":81.0958904109589},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-525.05,11026.05],"tickmode":"array","ticktext":["0","2500","5000","7500","10000"],"tickvals":[0,2500,5000,7500,10000],"categoryorder":"array","categoryarray":["0","2500","5000","7500","10000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Persons","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,16.6],"tickmode":"array","ticktext":["Preschool","1st-4th","5th-6th","7th-8th","9th","10th","11th","12th","HS-grad","Some-college","Assoc-voc","Assoc-acdm","Bachelors","Masters","Prof-school","Doctorate"],"tickvals":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"categoryorder":"array","categoryarray":["Preschool","1st-4th","5th-6th","7th-8th","9th","10th","11th","12th","HS-grad","Some-college","Assoc-voc","Assoc-acdm","Bachelors","Masters","Prof-school","Doctorate"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":null,"family":null,"size":0}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"6cf419596289":{"x":{},"y":{},"fill":{},"type":"bar"}},"cur_data":"6cf419596289","visdat":{"6cf419596289":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> 중산층여부에 대한 비율이 궁금해 이를 좀 더 시각적으로 부각시켜 표현하갰습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  count(education, wage) %&gt;%
+  group_by(education) %&gt;%
+  mutate(total_each_n = sum(n)) %&gt;%
+  mutate(ratio_each_edu_wage = round(n / total_each_n*100, 1)) -&gt; df_tmp
+
+df_tmp %&gt;%
+  ggplot(aes(education, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;, position = &#39;fill&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Ratio&quot;) +
+  theme_minimal() +
+  coord_flip() -&gt; p_tmp; ggplotly(p_tmp)</code></pre>
+<div id="htmlwidget-4" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999],"base":[0,0.0357142857142857,0.048048048048048,0.0619195046439628,0.0525291828793774,0.0664523043944266,0.051063829787234,0.0762124711316397,0.159508618226836,0.190234535728981,0.261215629522431,0.248359887535145,0.414752567693744,0.556587347649449,0.734375,0.7409200968523],"x":[1,0.964285714285714,0.951951951951952,0.938080495356037,0.947470817120623,0.933547695605573,0.948936170212766,0.92378752886836,0.840491381773165,0.809765464271019,0.738784370477569,0.751640112464855,0.585247432306256,0.443412652350551,0.265625,0.2590799031477],"y":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"text":["education: Preschool<br />n: 1.00000000<br />wage: <=50K","education: 1st-4th<br />n: 0.96428571<br />wage: <=50K","education: 5th-6th<br />n: 0.95195195<br />wage: <=50K","education: 7th-8th<br />n: 0.93808050<br />wage: <=50K","education: 9th<br />n: 0.94747082<br />wage: <=50K","education: 10th<br />n: 0.93354770<br />wage: <=50K","education: 11th<br />n: 0.94893617<br />wage: <=50K","education: 12th<br />n: 0.92378753<br />wage: <=50K","education: HS-grad<br />n: 0.84049138<br />wage: <=50K","education: Some-college<br />n: 0.80976546<br />wage: <=50K","education: Assoc-voc<br />n: 0.73878437<br />wage: <=50K","education: Assoc-acdm<br />n: 0.75164011<br />wage: <=50K","education: Bachelors<br />n: 0.58524743<br />wage: <=50K","education: Masters<br />n: 0.44341265<br />wage: <=50K","education: Prof-school<br />n: 0.26562500<br />wage: <=50K","education: Doctorate<br />n: 0.25907990<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999,0.899999999999999],"base":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"x":[0.0357142857142857,0.048048048048048,0.0619195046439628,0.0525291828793774,0.0664523043944266,0.051063829787234,0.0762124711316397,0.159508618226836,0.190234535728981,0.261215629522431,0.248359887535145,0.414752567693744,0.556587347649449,0.734375,0.7409200968523],"y":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"text":["education: 1st-4th<br />n: 0.03571429<br />wage: >50K","education: 5th-6th<br />n: 0.04804805<br />wage: >50K","education: 7th-8th<br />n: 0.06191950<br />wage: >50K","education: 9th<br />n: 0.05252918<br />wage: >50K","education: 10th<br />n: 0.06645230<br />wage: >50K","education: 11th<br />n: 0.05106383<br />wage: >50K","education: 12th<br />n: 0.07621247<br />wage: >50K","education: HS-grad<br />n: 0.15950862<br />wage: >50K","education: Some-college<br />n: 0.19023454<br />wage: >50K","education: Assoc-voc<br />n: 0.26121563<br />wage: >50K","education: Assoc-acdm<br />n: 0.24835989<br />wage: >50K","education: Bachelors<br />n: 0.41475257<br />wage: >50K","education: Masters<br />n: 0.55658735<br />wage: >50K","education: Prof-school<br />n: 0.73437500<br />wage: >50K","education: Doctorate<br />n: 0.74092010<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":95.7077625570777},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.05,1.05],"tickmode":"array","ticktext":["0.00","0.25","0.50","0.75","1.00"],"tickvals":[0,0.25,0.5,0.75,1],"categoryorder":"array","categoryarray":["0.00","0.25","0.50","0.75","1.00"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Ratio","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,16.6],"tickmode":"array","ticktext":["Preschool","1st-4th","5th-6th","7th-8th","9th","10th","11th","12th","HS-grad","Some-college","Assoc-voc","Assoc-acdm","Bachelors","Masters","Prof-school","Doctorate"],"tickvals":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"categoryorder":"array","categoryarray":["Preschool","1st-4th","5th-6th","7th-8th","9th","10th","11th","12th","HS-grad","Some-college","Assoc-voc","Assoc-acdm","Bachelors","Masters","Prof-school","Doctorate"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"education","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"6cf438e67fee":{"x":{},"y":{},"fill":{},"type":"bar"}},"cur_data":"6cf438e67fee","visdat":{"6cf438e67fee":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> 상식적인 발견일 수 있지만 학위가 높을수록 중산층 비율이 아닌 비율보다 높아지는 것을 알 수 있습니다. 그런데 education 변수와 educaiton_num 변수는 그 의미가 동일하므로 분석모델을 만드는 데 이 두 가지 변수를 모두 사용할 필요는 없을 것 같습니다. 분석에서는 범주형 변수보다는 숫자형 변수가 더 다루기 수월하므로 차후 분석을 위해 education 변수를 제거하도록 하겠습니다.</p>
+<pre class="r"><code>adult$education &lt;- NULL</code></pre>
+</div>
+<div id="marital_status" class="section level3">
+<h3>marital_status</h3>
+<p> marital_status 변수는 범주형(factor) 변수입니다.</p>
+<pre class="r"><code>adult$marital_status %&gt;% levels()</code></pre>
+<pre><code>## NULL</code></pre>
+<p> marital_status(범주형 변수)와 목적변수인 wage(범주형 변수)와의 관계를 파악할 땐 위 education 변수의 EDA처럼 막대그래프를 이용하는게 좋을 것 같습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  count(marital_status, wage) %&gt;%
+  ggplot(aes(marital_status, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Persons&quot;) +
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  coord_flip() -&gt; p; ggplotly(p)</code></pre>
+<div id="htmlwidget-5" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5">{"x":{"data":[{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9,0.9],"base":[463,10,6692,34,491,66,85],"x":[3980,13,8284,384,10192,959,908],"y":[1,2,3,4,5,6,7],"text":["marital_status: Divorced<br />n:  3980<br />wage: <=50K","marital_status: Married-AF-spouse<br />n:    13<br />wage: <=50K","marital_status: Married-civ-spouse<br />n:  8284<br />wage: <=50K","marital_status: Married-spouse-absent<br />n:   384<br />wage: <=50K","marital_status: Never-married<br />n: 10192<br />wage: <=50K","marital_status: Separated<br />n:   959<br />wage: <=50K","marital_status: Widowed<br />n:   908<br />wage: <=50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.9,0.9,0.9,0.9,0.9,0.9,0.9],"base":[0,0,0,0,0,0,0],"x":[463,10,6692,34,491,66,85],"y":[1,2,3,4,5,6,7],"text":["marital_status: Divorced<br />n:   463<br />wage: >50K","marital_status: Married-AF-spouse<br />n:    10<br />wage: >50K","marital_status: Married-civ-spouse<br />n:  6692<br />wage: >50K","marital_status: Married-spouse-absent<br />n:    34<br />wage: >50K","marital_status: Never-married<br />n:   491<br />wage: >50K","marital_status: Separated<br />n:    66<br />wage: >50K","marital_status: Widowed<br />n:    85<br />wage: >50K"],"type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":133.698630136986},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-748.8,15724.8],"tickmode":"array","ticktext":["0","5000","10000","15000"],"tickvals":[0,5000,10000,15000],"categoryorder":"array","categoryarray":["0","5000","10000","15000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"Persons","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,7.6],"tickmode":"array","ticktext":["Divorced","Married-AF-spouse","Married-civ-spouse","Married-spouse-absent","Never-married","Separated","Widowed"],"tickvals":[1,2,3,4,5,6,7],"categoryorder":"array","categoryarray":["Divorced","Married-AF-spouse","Married-civ-spouse","Married-spouse-absent","Never-married","Separated","Widowed"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":null,"family":null,"size":0}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"6cf43d1b11":{"x":{},"y":{},"fill":{},"type":"bar"}},"cur_data":"6cf43d1b11","visdat":{"6cf43d1b11":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> 위의 그래프에서 Marreid-AF-spouse는 Marreid Armed Force spouse의 약자이고 군에 배우자가 있는 경우를 의미합니다. Marreid-cil-spouse는 Marreid civillian spouse의 약자이고 군에 배우자가 없는 경우를 의미합니다. (Married-spouse-absent의 의미는?? 아직 잘 모르겠습니다.)</p>
+<pre class="r"><code>adult %&gt;%
+  count(marital_status, wage) %&gt;%
+  group_by(marital_status) %&gt;%
+  mutate(total_each_n = sum(n)) %&gt;%
+  mutate(ratio_each_wage = round(n / total_each_n*100, 1)) -&gt; df_tmp
+
+df_tmp %&gt;%
+  ggplot(aes(marital_status, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;, position = &#39;fill&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Ratio&quot;) +
+  theme_minimal() +
+  coord_flip() -&gt; p; p</code></pre>
+<p><img src="/post/2020-04-27-Adult_Census_Data_EDA_1_files/figure-html/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> 결혼을 하고 현재 배우자가 있는 경우가 중산층일 경우가 많습니다. 결혼을 하지 않거나 이혼을 하거나 혹은 별거 중인 사람들의 소득이 그렇지 않은 경우에 비에 낮아보입니다. 역시 잘 살려면 결혼을 해야…;;;</p>
+</div>
+<div id="occupation" class="section level3">
+<h3>occupation</h3>
+<pre class="r"><code>adult$occupation %&gt;% unique()</code></pre>
+<pre><code>##  [1] &quot;Adm-clerical&quot;      &quot;Exec-managerial&quot;   &quot;Handlers-cleaners&quot;
+##  [4] &quot;Prof-specialty&quot;    &quot;Other-service&quot;     &quot;Sales&quot;            
+##  [7] &quot;Craft-repair&quot;      &quot;Transport-moving&quot;  &quot;Farming-fishing&quot;  
+## [10] &quot;Machine-op-inspct&quot; &quot;Tech-support&quot;      &quot;?&quot;                
+## [13] &quot;Protective-serv&quot;   &quot;Armed-Forces&quot;      &quot;Priv-house-serv&quot;</code></pre>
+<p> 직업에 대한 정보들이 있네요. 여기서 자세한 의미를 확인해보지는 않겠습니다. 위와 같이 데이터의 분포만을 확인하겠습니다.그런데 이번에는 직업에 대한 구분이 모두 15개이고 그 중에는 “?”라는 값도 보입니다. 분석을 좀 더 간단히 하기 위해 좀 더 카테고리를 간단히 해 보겠습니다.</p>
+<p> 저는 case_when()이라는 함수를 참 좋아합니다. 제가 원하는데로 특정 값들을 바꾸어줄 수 있기 때문입니다. 다음의 코드를 잘 보시고 잘 익히신다면 분명 언젠가 도움이 되실 겁니다.</p>
+<p> 저는 다른 분석사례를 참고하여 다음과 같이 직업에 대한 카테고리를 White-Collar, Blue-Collar, Service, Professional, Other/Unknown 등 5가지로 단순화 시켰습니다. 이는 분석자가 임의하는 하는 것이여서 왜 이렇게 해야만 하는가에 대한 특별한 이유가 있는 것이 아닙니다. 전 단지 분석을 좀 더 단순하게 하고 싶어서 이렇게 해 본 것 뿐입니다.</p>
+<pre class="r"><code>adult %&gt;%
+  mutate(occupation = as.character(occupation)) %&gt;%
+  mutate(occupation = case_when(
+    occupation %in% c(&quot;Adm-clerical&quot;, &quot;Exec-managerial&quot;) ~ &quot;White-Collar&quot;,
+    occupation %in% c(&quot;Craft-repair&quot;, &quot;Farming-fishing&quot;, &quot;Handlers-cleaners&quot;, 
+                      &quot;Machine-op-inspct&quot;, &quot;Transport-moving&quot;) ~ &quot;Blue-Collar&quot;,
+    occupation %in% c(&quot;Other-service&quot;, &quot;Priv-house-serv&quot;, 
+                      &quot;Protective-serv&quot;, &quot;Tech-support&quot;) ~ &quot;Service&quot;,
+    occupation %in% c(&quot;Prof-specialty&quot;) ~ &quot;Professional&quot;,
+    occupation %in% c(&quot;?&quot;, &quot;Armed-Forces&quot;) ~ &quot;Other/Unknown&quot;,
+    TRUE ~ as.character(occupation)
+  )) -&gt; adult</code></pre>
+<pre class="r"><code>adult$occupation %&gt;% table()</code></pre>
+<pre><code>## .
+##   Blue-Collar Other/Unknown  Professional         Sales       Service 
+##         10062          1852          4140          3650          5021 
+##  White-Collar 
+##          7836</code></pre>
+<p> 이제 이 데이터를 다른 변수들에서 했던 것 처럼 시각화해 보도록 하겠습니다.</p>
+<pre class="r"><code>adult %&gt;%
+  count(occupation, wage) %&gt;%
+  ggplot(aes(occupation, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Persons&quot;) +
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  coord_flip() -&gt; p; p</code></pre>
+<p><img src="/post/2020-04-27-Adult_Census_Data_EDA_1_files/figure-html/unnamed-chunk-29-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>adult %&gt;%
+  count(occupation, wage) %&gt;%
+  group_by(occupation) %&gt;%
+  mutate(total_each_n = sum(n)) %&gt;%
+  mutate(ratio_each_wage = round(n / total_each_n*100, 1)) -&gt; df_tmp
+
+df_tmp %&gt;%
+  ggplot(aes(occupation, n, fill = wage)) +
+  geom_bar(stat = &#39;identity&#39;, position = &#39;fill&#39;) +
+  scale_color_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  ylab(&quot;Ratio&quot;) +
+  theme_minimal() +
+  coord_flip() -&gt; p; p</code></pre>
+<p><img src="/post/2020-04-27-Adult_Census_Data_EDA_1_files/figure-html/unnamed-chunk-30-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> <code>Professional</code> 직업군이 중산층 비율이 가장 높네요. 역시 직업은 전문직이 최고인가 봅니다.</p>
+<p> 이번 포스트에서는 7가지의 변수에 대한 EDA를 진행해보았습니다. 포스트가 너무 길어져 나머지 변수 즉
+“relationship”, “race”, “sex”, “capital_gain”, “capital_loss”, “hours_per_week”, “native_country” 변수들에 대한 EDA는 다음 포스트에서 이어 가도록 하겠습니다.</p>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

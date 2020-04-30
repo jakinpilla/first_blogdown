@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.69.0" />
+
+
+<title>로지스틱 회귀(Logistic Regression) 모형의 평가: 로그가능도, 이탈도 등 - My DataScience Blog</title>
+<meta property="og:title" content="로지스틱 회귀(Logistic Regression) 모형의 평가: 로그가능도, 이탈도 등 - My DataScience Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">Daniel Kim</a></li>
+    
+    <li><a href="https://github.com/jakinpilla">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/jakinpilla">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">16 min read</span>
+    
+
+    <h1 class="article-title">로지스틱 회귀(Logistic Regression) 모형의 평가: 로그가능도, 이탈도 등</h1>
+
+    
+    <span class="article-date">2020-04-25</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="로지스틱-회귀-모형의-평가-로그-가능도-통계량" class="section level2">
+<h2>로지스틱 회귀 모형의 평가: 로그 가능도 통계량</h2>
+<p> 로지스틱 회귀에서도 선형회귀에서와 마찬가지로 관측값과 예측값을 비교해서 모형의 적합도를 평가합니다. 이때 쓰이는 척도가 로그우도(log-likelihood)입니다. 로지스틱 회귀 모델에서 로그우도를 계산하는 식은 다음과 같습니다.</p>
+<p><span class="math display">\[LL = \sum_{i=1}^{N} \left[  Y_{i} \ln(P(Y_{i})) + (1-Y_{i})\ln(1 - P(Y_{i}))  \right]\]</span></p>
+<p> 머신러닝 학습을 하게 되면 <strong>우도</strong>라는 말이 자주 등장합니다. 그리고 그와 함께 따라 다니는 개념이 <strong>최대우도추정(Maximum Likelihood Estimation)</strong>입니다. 우도와 최대우도추정을 이번 포스트에서 모두 다루기는 어렵습니다. 언젠가 자세한 설명을 한 포스트를 올리겠습니다.</p>
+<p> 다만, 이번 포스트에서는 왜 로그가능도를 계산하는 식이 위와같이 나왔는가에 대한 설명을 수학적으로만 하려고 합니다. 다소 어려운 개념을 포함하므로 이해하기 어려우시면 다음 올리는 포스트를 참고하여 주시기 바랍니다.</p>
+<p> 로지스틱 회귀의 결과변수는 0 또는 1의 값을 가지는 베르누이 확률변수입니다.(뭐지 이 베르누이는?…) 이 말을 <span class="math inline">\(Y \text{~} Brenoulli(P)\)</span>라고도 표현합니다. 만약 1이 나올 확률이 <span class="math inline">\(P\)</span>라고 한다면 반대로 0이 나올 확률은 <span class="math inline">\(1-P\)</span>입니다. 여기서의 <span class="math inline">\(P\)</span>를 좀 더 쉽게 이해해 볼까요? 저는 주머니에 0과 1이 쓰여져 있는 똑같은 크기의 공들이 여러개 있는 상황을 머리속에서 상상하곤 합니다. 저는 지금 그 주머니의 얼마나 많은 공이 서로 몇 개씩 섞여 있는지 상태를 모릅니다. 이런 상황속에서 모든 것을 알고 있는 현자가 갑자기 나타나 제가 1이 쓰여진 공을 뽑을 확률이 0.25라고 알려주었다고 해 보겠습니다. 그럼 전 공 4개 중에 1개가 1이 쓰여져 있겠구나라고 알게 됩니다. 여기서 현자가 제게 알려준 0.25가 바로 <span class="math inline">\(P\)</span>입니다. 주머니 속에 두 개의 다른 공들이 섞여 있는 상태(state)를 설명하기 위해 많은 것이 필요하지 않습니다. 단지 <span class="math inline">\(P\)</span> 하나면 주머니 속에 상태를 설명하기에 중분합니다.</p>
+<p> 위와 같은 상황을 좀 더 수식으로 표현하면 다음과 같습니다.</p>
+<p><span class="math display">\[ \text{Bernoulli}(Y;P) = \begin{cases} P &amp; \text{if } Y_{i} = 1 \\ 1 - P &amp; \text{if } Y_{i}=0 \end{cases} \]</span></p>
+<p> 만약 위의 표현식을 조건문 없이 표현한다고 하면 어떻게 될까요?</p>
+<p><span class="math display">\[ \text{Bernoulli}(Y;P) =  P^{Y_{i}}(1-P)^{1-Y_{i}} \quad \quad (Y_{i} = 0, 1)\]</span></p>
+<p> <span class="math inline">\(Y_{i}\)</span>에 직접 0과 1을 대입하여 생각해보면 위의 식과 아래의 식이 동일함을 알 수 있습니다. 로지스틱 회귀의 결과변수는 <span class="math inline">\(P^{Y_{i}}(1-P)^{1-Y_{i}}\)</span>인 확률분포를 따릅니다.</p>
+<p> 자 이제부터 위의 식을 가지고 좀 더 나아가 생각해보겠습니다. 위의 식에서 <span class="math inline">\(i\)</span> 첨자는 <span class="math inline">\(i\)</span>번째를 의미합니다. 정확히는 <span class="math inline">\(i\)</span>번째 사건을 의미하지요. 그렇다면 현재 두 번의 사건이 일어났는데 이 두 번의 사건이 일어날 수있는 확률은 어떻게 계산할까요?</p>
+<p> 우리는 여기서 두 사건이 독립이라는 가정을 하게 됩니다. 즉 앞의 사건이 뒤의 사건에 영향을 미치지 않는다는 의미입니다. 두 사건이 독립일 때 이 두 사건이 일어날 확률은 단순히 각각의 사건이 일어날 확률을 곱하는 것입니다. 즉,</p>
+<p><span class="math display">\[P^{Y_{1}}(1-P)^{1-Y_{1}} \times P^{Y_{2}}(1-P)^{1-Y_{2}}\]</span></p>
+<p> 위와 같은 수식을 좀 더 간결하고 우아하게 표현하면 파이 프로덕트(product) 연산자를 이용하여 다음과 같이 표현할 수 있습니다.</p>
+<p><span class="math display">\[\prod_{i=1}^{2} P^{Y_{i}}(1-P)^{1-Y_{i}}\]</span></p>
+<p> 이것을 두 번의 사건이 아닌 N번의 사건이 발생한 경우의 확률을 구하는 식으로 변환하려면 단순히 2를 N으로 바꾸어 주면 됩니다. 그래서 결국 첫 번째 사건부터 N번째 사건이 발생할 확률을 구하면 다음의 식이 나오게 됩니다.</p>
+<p><span class="math display">\[\prod_{i=1}^{N} P^{Y_{i}}(1-P)^{1-Y_{i}}\]</span></p>
+<p> </p>
+<ul>
+<li>로그가능도는 예측값들과 실제 관측값들에 관한 확률들의 합이다.</li>
+<li>로그가능도 통계량은 모형이 적합된 후에도 여전히 설명되지 않는 정보의 양을 나타낸다.</li>
+<li>이는 마치 다중회귀의 잔차제곱합(<span class="math inline">\(SS_{R}\)</span>)과 비슷하다.</li>
+<li>로그가능도 통계량이 크다는 것은 설명되지 않은 관측이 많이 남아 있다는 것이다.</li>
+<li>로그가능도 통계량이 큰 통계적 모형은 자료에 별로 적합하지 않다고 할 수 있다.</li>
+</ul>
+<div id="모형의-평가-이탈도-통계량" class="section level3">
+<h3>모형의 평가: 이탈도 통계량</h3>
+<ul>
+<li>deviance: <span class="math inline">\(-2LL\)</span></li>
+</ul>
+<p><span class="math display">\[Logistic \ Regression \ Deviance = -2 \times LL\]</span></p>
+<ul>
+<li><p>로그가능도를 그대로 사용하는 것보다는 이 이탈도를 사용하는 것이 (거의) 항상 더 편한데, 왜냐하면 이탈도는 카이제곱 분포를 따르기 때문이다.</p></li>
+<li><p>다중회귀에서는 흔히 모든 점수의 평균을 기저 모형으로 사용한다. 다른 어떤 정보도 없는 상태에서 결과를 예측하기 위해 사용할 수 있는 최선의 모형이 평균이기 때문이다.</p></li>
+<li><p>다중회귀에서는 평균이 기저 모형이었지만 로지스틱 회귀에서는 가장 자주 발생한 결과가 기저 모형이다. 기저 로지스틱 모형은 상수 하나만 포함한 모형에 해당한다.</p></li>
+<li><p>기저모형에 더 많은 예측변수를 추가함으로써 모형을 좀 더 개선할 수 있다.</p></li>
+</ul>
+<p><span class="math display">\[  \chi^{2} = (-2LL(기저모형)) - (-2LL(새모형)) \]</span></p>
+<p><span class="math display">\[  \chi^{2} = 2LL(새모형) - 2LL(기저모형) \]</span></p>
+<p><span class="math display">\[ df = k_{new \ model}  - k_{base \ model}\]</span></p>
+<ul>
+<li><p>카이제곱은 새 모형의 이탈도에서 기저 모형의 이탈도를 뺀 값이다. 이 차이를 가능도비(likelihood ratio)라고 한다.</p></li>
+<li><p>df는 자유도인데 새 모형의 매개 변수에서 기저 모형의 매개변수 개수를 뺀 것이다.</p></li>
+<li><p>가능도비는 자유도가 <span class="math inline">\(df\)</span>인 카이제곱 분포를 따른다.</p></li>
+<li><p>기저모형의 매개변수는 항상 하나이다. 따라서, 이후의 새 모형들의 자유도는 항상 예측변수 개수에 1을 더한 값이다.</p></li>
+</ul>
+</div>
+<div id="모형의-평가-r과-r2" class="section level3">
+<h3>모형의 평가: <span class="math inline">\(R\)</span>과 <span class="math inline">\(R^{2}\)</span></h3>
+<ul>
+<li><p>로지스틱 회귀에도 다중회귀의 <span class="math inline">\(R\)</span>과 좀 더 직접적으로 대응되는 통계량이 있다. 바로 R 통계량(R-statistic)이다.</p></li>
+<li><p>이 R 통계량은 결과변수와 각 예측변수 사이의 편상관계수로, 그 값은 -1에서 1까지이다.</p></li>
+<li><p>R 통계량의 값이 양수이면 예측변수의 값이 증가함에 따라 결과의 발생 가능도도 증가한다는 뜻이고, 값이 음수이면 예측변수의 값이 증가함에 따라 결과의 발생 가능도도 증가한다는 뜻이다.</p></li>
+<li><p>R 통계량의 크기가 작다는 것은그 변수가 모형에 조금만 기여한다는 뜻이다.</p></li>
+</ul>
+<p><span class="math display">\[R = \sqrt \frac{z^{2} - 2df}{-2LL}\]</span></p>
+<ul>
+<li><span class="math inline">\(z^{2}\)</span>은 왈드 통계량(Wald Statistic)이다.</li>
+<li>R 값은 왈드 통계량에 의존하므로, 정확한 측도는 절대 아니다. 그리고 이 값의 제곱을 선형회귀에서처럼 해석하는 것은 유효하지 않다.</li>
+<li>로지스틱 회귀에서 선형회귀의 <span class="math inline">\(R^{2}\)</span>에 해당하는 좋은 측도 중 하나는 <strong>호스머-렘쇼 측도</strong>가 있다.</li>
+</ul>
+<p><span class="math display">\[R^{2}_{L} = \frac{-2LL(모형)}{-2LL(기저모형)}\]</span></p>
+<p><span class="math display">\[R^{2}_{L} = \frac{-2LL(기저모형) - 2LL(새모형)}{-2LL(기저모형)}\]</span></p>
+<ul>
+<li>콕스-스넬 <span class="math inline">\(R^{2}_{CS}\)</span></li>
+</ul>
+<p><span class="math display">\[R^{2}_{CS} = 1 - exp \left( \frac{(-2LL(새모형) - (-2LL(기저모형))}{n} \right)\]</span></p>
+<ul>
+<li>네이글커크의 <span class="math inline">\(R^{2}_{N}\)</span></li>
+</ul>
+<p><span class="math display">\[R^{2}_{N} = \frac{R^{2}_{CS}}{1 - exp \left( -\frac{-2LL(기저모형)}{n} \right)}\]</span></p>
+</div>
+<div id="모형의-평가-정보기준" class="section level3">
+<h3>모형의 평가: 정보기준</h3>
+<ul>
+<li>아카이케 정보기준(AIC)</li>
+</ul>
+<p><span class="math display">\[AIC = -2LL + 2k\]</span></p>
+<ul>
+<li>베이즈 정보기준(BIC)</li>
+</ul>
+<p><span class="math display">\[BIC = -2LL + 2k \times log(n)\]</span></p>
+</div>
+<div id="예측변수의-기여도-평가-z-통계량" class="section level3">
+<h3>예측변수의 기여도 평가: z 통계량</h3>
+<ul>
+<li>로지스틱 회귀에서도 개별 예측변수의 기여도도 측정할 필요가 있다. 선형회귀에서는 추정된 회귀계수(b)와 그 표준오차를 이용해서 <span class="math inline">\(t\)</span> 통계량을 계산했다. 로지스틱 회귀에서도 그에 대응되는 통계량이 있는데, 바로 z 통계량이다.(z-statistic)</li>
+</ul>
+<p><span class="math display">\[z = \frac{b}{SE_{b}}\]</span></p>
+<ul>
+<li>z 통계량은 그냥 회귀계수를 자신의 표준오차로 나눈 것이다.</li>
+<li>z 통계량을 사용할 때는 조금 조심해야 하는데, 왜냐하면 회귀계수가 클 때는 표준오차가 상승(inflation)해서 z 통계량이 과소평가될 수 있기 때문이다.</li>
+</ul>
+</div>
+<div id="승산비" class="section level3">
+<h3>승산비</h3>
+<ul>
+<li>odds: 승산, 그 사건이 발생할 확률을 그 사건이 발생하지 않을 확률로 나눈 것</li>
+<li>odds ratio: 승산비, 변경 후의 승산을 변경 전의 승산으로 나눈 것</li>
+</ul>
+<p><span class="math display">\[odds = \frac{P(사건)}{P(사건없음)}\]</span></p>
+<p><span class="math display">\[P(사건 Y) = \frac{1}{1 + e^{-(b_{0} + b_{1}X_{1i})}}\]</span></p>
+<p><span class="math display">\[P(사건없음) = 1 - P(사건 Y)\]</span></p>
+<ul>
+<li>예측변수를 1단위 변경하기 전과 후의 승산들을 구하고 둘의 변화 비율을 계산하면 승산비를 구할 수 있다.</li>
+</ul>
+<p><span class="math display">\[\Delta 승산 = \frac{예측변수의 \ 1단위 \ 변경 \ 이후의 \ 승산}{원래의 \ 승산}\]</span></p>
+</div>
+<div id="여러-로지스틱-회귀-방법" class="section level3">
+<h3>여러 로지스틱 회귀 방법</h3>
+<div id="강제도입법" class="section level4">
+<h4>강제도입법</h4>
+</div>
+<div id="단계적-방법" class="section level4">
+<h4>단계적 방법</h4>
+<ul>
+<li>전진, 후진, 전후진 및 후전진 방법 등이 있다.</li>
+</ul>
+</div>
+<div id="방법의-선택" class="section level4">
+<h4>방법의 선택</h4>
+<ul>
+<li>후진 방향의 변수 제거에 비해 전진 방향의 변수 선택은 억제인자 효과와 관련된 예측변수를 배제할 가능성이 크다. 따라서 전진 방향의 단계적 방법에서는 제2종오류(즉, 실제로 결과변수를 예측하는 예측변수를 빼먹는 오류)를 범할 위험이 크다.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="가정과-잠재적-문제점" class="section level2">
+<h2>가정과 잠재적 문제점</h2>
+<div id="가정" class="section level3">
+<h3>가정</h3>
+<ul>
+<li><ol style="list-style-type: decimal">
+<li>선형성: 임의의 연속 예측변수들과 결과변수의 로짓 관계가 선형이어야 한다.</li>
+</ol></li>
+</ul>
+<p><span class="math display">\[\log(\frac{\mu}{1 - \mu}) = \eta(x)  = x\beta\]</span></p>
+<ul>
+<li><ol start="2" style="list-style-type: decimal">
+<li>오차의 독립성: 사례들 사이에 관계가 없어야 한다.</li>
+</ol></li>
+<li><ol start="3" style="list-style-type: decimal">
+<li>다중공선성 부재: VIF 통계량, 비례 비중심화 외적 행렬(scaled, uncentered cross-products matrix)의 고유값들, 분산비율의 조건 지수들로 확인</li>
+</ol></li>
+</ul>
+</div>
+<div id="faiilure-to-converge에-관한-r-메세지" class="section level3">
+<h3>faiilure to converge에 관한 R 메세지</h3>
+<ul>
+<li>반복과정을 통해 통계적 절차를 수행할 때 최대 반복 횟수가 되었어도 값이 수렴되지 않았다는 뜻이다. 이런 메세지가 나왔다면 R이 출력한 모든 결과를 무시해야 한다.</li>
+</ul>
+</div>
+<div id="예측변수로부터의-불완전-정보" class="section level3">
+<h3>예측변수로부터의 불완전 정보</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="center">담배를 피우는가?</th>
+<th align="center">토마토를 먹는가?</th>
+<th align="center">암에 걸렸는가?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">예</td>
+<td align="center">아니오</td>
+<td align="center">예</td>
+</tr>
+<tr class="even">
+<td align="center">예</td>
+<td align="center">예</td>
+<td align="center">예</td>
+</tr>
+<tr class="odd">
+<td align="center">아니요</td>
+<td align="center">아니요</td>
+<td align="center">예</td>
+</tr>
+<tr class="even">
+<td align="center">아니요</td>
+<td align="center">예</td>
+<td align="center">?????</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>이러한 문제는 교차표를 이용해서 점검해 보아야 한다. 표의 각 칸에 있는 기대 도수들도 살펴볼 필요가 있다. 그 도수들이 모두 1보다 큰지, 그리고 5 미만인 도수가 20%는 넘는지 확인해야 한다.(로지스틱 회귀의 적합성 검정이 그러한 가정을 깔고 있기 때문이다.)</li>
+</ul>
+</div>
+<div id="완전-분리" class="section level3">
+<h3>완전 분리</h3>
+<ul>
+<li><p>로지스틱 회귀가 실패로 끝나는 또 다른 상황은 한 변수 또는 변수들의 한 조합이 결과변수를 완벽하게 예측할 때이다.</p></li>
+<li><p>세로축이 0인 삼각형과 1인 삼각형들이 있는데 삼각형들의 범위가 겹치지 않는다. 도둑만큼 무서운 고양이가 없는 것이다. 이러한 상황을 완전분리(complete separation)이라고 한다.</p></li>
+<li><p>표본에 15kb과 40kg 사이의 자료가 없으므로, 그 범위의 체중에 대한 확률을 구할 수 없다. R은 이 중간지점에 대한 기울기를 최선을 다해 추측하려 하는데, 그 과정에서 근사값들이 무한대를 향해 발산하는 불안정한 상황이 발생할 수 있다.(즉, 표준오차가 그렇게 크게 나타는 것이다.)</p></li>
+</ul>
+</div>
+</div>
+<div id="이번-장에서-사용하는-패키지들" class="section level2">
+<h2>이번 장에서 사용하는 패키지들</h2>
+<ul>
+<li>car, mlogit</li>
+</ul>
+</div>
+<div id="이항-로지스틱-회귀-미끈미끈한-예제-하나" class="section level2">
+<h2>이항 로지스틱 회귀: 미끈미끈한 예제 하나</h2>
+<ul>
+<li>항문, 뱀장어</li>
+</ul>
+<div id="자료준비" class="section level3">
+<h3>자료준비</h3>
+<pre class="r"><code>eelData &lt;- read.delim(&#39;eel.dat&#39;, header = T)</code></pre>
+<pre class="r"><code>head(eelData)</code></pre>
+<pre><code>##       Cured Intervention Duration
+## 1 Not Cured No Treatment        7
+## 2 Not Cured No Treatment        7
+## 3 Not Cured No Treatment        6
+## 4     Cured No Treatment        8
+## 5     Cured Intervention        7
+## 6     Cured No Treatment        6</code></pre>
+<pre class="r"><code>eelData$Cured &lt;-relevel(eelData$Cured, &#39;Not Cured&#39;)
+eelData$Intervention &lt;- relevel(eelData$Intervention, &#39;No Treatment&#39;)</code></pre>
+<pre class="r"><code>eelData %&gt;% str()</code></pre>
+<pre><code>## &#39;data.frame&#39;:    113 obs. of  3 variables:
+##  $ Cured       : Factor w/ 2 levels &quot;Not Cured&quot;,&quot;Cured&quot;: 1 1 1 2 2 2 1 2 2 1 ...
+##  $ Intervention: Factor w/ 2 levels &quot;No Treatment&quot;,..: 1 1 1 1 2 1 2 2 1 1 ...
+##  $ Duration    : int  7 7 6 8 7 6 7 7 8 7 ...</code></pre>
+</div>
+<div id="r을-이용한-기본적인-로지스틱-회귀분석" class="section level3">
+<h3>R을 이용한 기본적인 로지스틱 회귀분석</h3>
+<ul>
+<li>glm()</li>
+<li>family 인수에는 분포의 종류(가우스, 이항, 푸아송, 감마 등)를 나타내는 객체를 지정</li>
+<li>na.action</li>
+<li>Binomial(link = ‘logit’)과 Binomial(link = ‘probit’)</li>
+</ul>
+<pre class="r"><code>eelmodel_1 &lt;- glm(Cured ~ Intervention, data = eelData, family = binomial())</code></pre>
+<pre class="r"><code>eelmodel_2 &lt;- glm(Cured ~ Intervention + Duration, data = eelData, family = binomial())</code></pre>
+<pre class="r"><code>eelmodel_1 %&gt;% summary()</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Cured ~ Intervention, family = binomial(), data = eelData)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.5940  -1.0579   0.8118   0.8118   1.3018  
+## 
+## Coefficients:
+##                          Estimate Std. Error z value Pr(&gt;|z|)   
+## (Intercept)               -0.2877     0.2700  -1.065  0.28671   
+## InterventionIntervention   1.2287     0.3998   3.074  0.00212 **
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 154.08  on 112  degrees of freedom
+## Residual deviance: 144.16  on 111  degrees of freedom
+## AIC: 148.16
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<ul>
+<li>Null deviance: 154.08 on 112 degrees of freedom</li>
+<li>Residual deviance: 144.16 on 111 degrees of freedom</li>
+<li>이 이탈도가 클수록 통계적 모형으로서의 이 회귀모형은 자료에 잘 적합하지 않는 것이다.</li>
+<li>귀무 이탈도(Null deviance)는 상수만 있고 예측변수는 전혀 없는 모형의 이탈도이다. 즉, -2LL(기저모형)이 바로 귀무 이탈도이다.</li>
+<li>잔차 이탈도는 모형의 이탈도, 즉 -2LL이다.</li>
+<li>기저 모형의 이탈도는 154.08이지만 거기에 Intervention을 추가하니 이탈로가 144.16으로 감소했다. 이후의 모델이 결과를 좀 더 잘 예측한다.</li>
+<li>귀무 이탈도에서 이탈도를 뺀 것이 바로 모형의 개선 정도를 뜻하는 카이제곱 통계량이다.</li>
+</ul>
+<pre class="r"><code>modelChi &lt;- eelmodel_1$null.deviance - eelmodel_2$deviance
+modelChi</code></pre>
+<pre><code>## [1] 9.928185</code></pre>
+<ul>
+<li>귀무 모형의 자유도에서 eelmodel_1 모형의 자유도를 빼면 앞에서 구한 카이제곱 통계량의 자유도가 된다.</li>
+</ul>
+<pre class="r"><code>chidf &lt;- eelmodel_1$df.null - eelmodel_1$df.residual
+chidf</code></pre>
+<pre><code>## [1] 1</code></pre>
+<ul>
+<li>pchisq()
+-우리가 원하는 확률은 1에서 <span class="math inline">\(pchisq()\)</span> 함수의 결과를 뺀 것이다.</li>
+</ul>
+<pre class="r"><code>chisq.prob &lt;- 1 - pchisq(modelChi, chidf)
+chisq.prob</code></pre>
+<pre><code>## [1] 0.00162767</code></pre>
+<ul>
+<li><p>따라서, 모형에 Intervention을 포함함으로써 모형의 적합도가 <span class="math inline">\(\chi^{2} = 9.93, p = .002\)</span>로 유의하게 개선되었다는 결론을 내릴 수 있다.</p></li>
+<li><p>Intervention 1.22879(Estimate) 0.3998(Error) 3.074(z value) 0.00212(Pr)</p></li>
+<li><p><span class="math inline">\(b\)</span>값은 예측변수의 1단위 변화에 따른 결과의 로짓의 변화량을 나타낸다. 결과의 로짓이란 그냥 해당 Y값이 나올 승산의 자연로그이다.</p></li>
+<li><p><span class="math inline">\(b=1.23, z=3.07,p&lt;.002\)</span> z 통계량의 유의확률이 .05미만이므로 Intervention은 치료 여부의 유의한 예측변수라고 할 수 있다.</p></li>
+<li><p>로지스틱 회귀의 R</p></li>
+</ul>
+<p><span class="math display">\[R = \sqrt \frac{3.074^2 - 2 \times1}{154.08} = .22\]</span></p>
+<ul>
+<li><span class="math inline">\(R^{2}_{L}\)</span>: 호스머-램쇼</li>
+</ul>
+<pre class="r"><code>R2.hl &lt;- modelChi / eelmodel_1$null.deviance
+R2.hl</code></pre>
+<pre><code>## [1] 0.06443358</code></pre>
+<ul>
+<li>콕스-스넬 <span class="math inline">\(R^{2}_{CS}\)</span></li>
+</ul>
+<pre class="r"><code>R.cs &lt;- 1 - exp((eelmodel_1$deviance - eelmodel_1$null.deviance) / 113)
+R.cs</code></pre>
+<pre><code>## [1] 0.08409487</code></pre>
+<ul>
+<li>네이글커크의 <span class="math inline">\(R^{2}_{N}\)</span></li>
+</ul>
+<pre class="r"><code>R.n &lt;- R.cs/(1 - exp( - (eelmodel_1$null.deviance / 113)))
+R.n</code></pre>
+<pre><code>## [1] 0.112992</code></pre>
+<pre class="r"><code>logisticPseudoR2s &lt;- function(LogModel) {
+  dev &lt;- LogModel$deviance
+  nullDev &lt;- LogModel$null.deviance
+  modelN &lt;- length(LogModel$fitted.values)
+  R.l &lt;- 1 - dev / nullDev
+  R.cs &lt;- 1 - exp( -(nullDev - dev) / modelN)
+  R.n &lt;- R.cs / (1 - (exp( - (nullDev / modelN))))
+  
+  cat(&#39;Pseudo R^2 for logistic regression\n&#39;)
+  cat(&#39;Hosmer and Lemeshow R^2 &#39;, round(R.l, 3), &#39;\n&#39;)
+  cat(&#39;Cox and Shell R^2&#39;, round(R.cs, 3), &#39;\n&#39;)
+  cat(&#39;Nagekkerke R^2&#39;, round(R.n, 3), &#39;\n&#39;)
+}
+
+logisticPseudoR2s(eelmodel_1)</code></pre>
+<pre><code>## Pseudo R^2 for logistic regression
+## Hosmer and Lemeshow R^2  0.064 
+## Cox and Shell R^2 0.084 
+## Nagekkerke R^2 0.113</code></pre>
+<pre class="r"><code>model.display &lt;- logistic.display(eelmodel_1)
+model.table &lt;- model.display$table[rownames(model.display$table)!=&quot;&quot;, ]
+kable(model.table, caption = model.display$first.line)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-16">Table 1: </span>
+Logistic regression predicting Cured : Cured vs Not Cured</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">x</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>OR(95%CI)</td>
+<td align="left">3.42 (1.56,7.48)</td>
+</tr>
+<tr class="even">
+<td>P(Wald’s test)</td>
+<td align="left">0.002</td>
+</tr>
+<tr class="odd">
+<td>P(LR-test)</td>
+<td align="left">0.002</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>X = 0</code> 일때의 승산</li>
+</ul>
+<pre class="r"><code>p_cured &lt;- 1/(1 + exp(-(-.288 + 1.229*0)))
+p_cured</code></pre>
+<pre><code>## [1] 0.4284936</code></pre>
+<pre class="r"><code>p_not_cured &lt;- 1 - p_cured
+p_not_cured</code></pre>
+<pre><code>## [1] 0.5715064</code></pre>
+<pre class="r"><code>odds &lt;- p_cured/p_not_cured
+odds</code></pre>
+<pre><code>## [1] 0.7497616</code></pre>
+<ul>
+<li><code>X = 1</code> 일때의 승산</li>
+</ul>
+<pre class="r"><code>p_cured_1 &lt;- 1/(1 + exp(-(-.288 + 1.229*1))); p_cured_1</code></pre>
+<pre><code>## [1] 0.7193016</code></pre>
+<pre class="r"><code>p_not_cured_1 &lt;- 1 - p_cured_1; p_not_cured_1</code></pre>
+<pre><code>## [1] 0.2806984</code></pre>
+<pre class="r"><code>odds_1 &lt;- p_cured_1 / p_not_cured_1; odds_1</code></pre>
+<pre><code>## [1] 2.562543</code></pre>
+<ul>
+<li>이렇게 예측변수의 1단위 변경 이전(<code>odds</code>)과 이후(<code>odds_1</code>)의 승산들이 나왔다. 이제 예측변수의 1단위 변경 이후의 승산을 이전의 승산으로 나누어 승산비를 구한다.</li>
+</ul>
+<pre class="r"><code>odds_ratio &lt;- odds_1/odds; odds_ratio # exp(1.2287) 의 값이 3.41781임에 유의</code></pre>
+<pre><code>## [1] 3.41781</code></pre>
+<p>또한, 예측변수의 b 계수의 지수함수로서의 승산비도 계산해보자.</p>
+<pre class="r"><code>eelmodel_1$coefficients %&gt;% exp()</code></pre>
+<pre><code>##              (Intercept) InterventionIntervention 
+##                 0.750000                 3.416667</code></pre>
+<p> 위에서 직접 계산한 승산비와 이 값은 서로 동일하다(반올림을 고려할 때). 이 값이 1보다 크다는 것은 예측변수가 증가하면 결과가 발생할 승산도 증가한다는 뜻이다.반대로 1보다 작으면 결과가 발생할 승산이 감소한다는 뜻이다.</p>
+<p> 이 예에서는 처치를 받은 환자가 치료될 승산이 처치를 받지 않은 환자가 치료될 승산의 3.42배라고 말할 수 있다.</p>
+<p> 승산비들의 신뢰구간을 구해보자.</p>
+<pre class="r"><code>exp(confint(eelmodel_1))</code></pre>
+<pre><code>##                              2.5 %   97.5 %
+## (Intercept)              0.4374531 1.268674
+## InterventionIntervention 1.5820127 7.625545</code></pre>
+<p> 이 결과에서 중요한 것은 예측변수 승산비의 신뢰구간에 1이 포함되지 않는다는 점이다. 신뢰구간의 상계와 하계가 모두 1보다 크므로 모집단에서의 관계의 방향이 관측된 관계의 방향과 같다고 확신할 수 있다.(하계가 1보다 작다면 확신할 수 없다.)</p>
+</div>
+<div id="모형2-intervention과-duration-변수로-예측" class="section level3">
+<h3>8.6.6 모형2: Intervention과 Duration 변수로 예측</h3>
+<pre class="r"><code>eelmodel_2 %&gt;% summary()</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Cured ~ Intervention + Duration, family = binomial(), 
+##     data = eelData)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.6025  -1.0572   0.8107   0.8161   1.3095  
+## 
+## Coefficients:
+##                           Estimate Std. Error z value Pr(&gt;|z|)   
+## (Intercept)              -0.234660   1.220563  -0.192  0.84754   
+## InterventionIntervention  1.233532   0.414565   2.975  0.00293 **
+## Duration                 -0.007835   0.175913  -0.045  0.96447   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 154.08  on 112  degrees of freedom
+## Residual deviance: 144.16  on 110  degrees of freedom
+## AIC: 150.16
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<p> Duration의 b값은 꽤 작은 값인 -0.007835이고 확률은 .964로 &gt; .05이므로 유의하지 않다.</p>
+<p> 모형 1과 모형 2를 비교해 보면, 두 모형의 이탈도가 같다.(144.16) 이는 모형 2가 모형 1보다 그리 크게 개선되지는 않았음을 뜻한다.</p>
+<p> <code>anova()</code> 함수를 이용해 모형들의 차이를 계산해보자. <code>anova()</code> 함수는 자유도는 계산해주지만 유의확률까지 계산해 주지는 않는다.</p>
+<pre class="r"><code>anova(eelmodel_1, eelmodel_2)</code></pre>
+<pre><code>## Analysis of Deviance Table
+## 
+## Model 1: Cured ~ Intervention
+## Model 2: Cured ~ Intervention + Duration
+##   Resid. Df Resid. Dev Df  Deviance
+## 1       111     144.16             
+## 2       110     144.16  1 0.0019835</code></pre>
+<p> 두 모형의 이탈도 차이, 자유도 차이 및 유의확률을 직접 계산을 통해 구해보자.</p>
+<pre class="r"><code>modelChi &lt;- eelmodel_1$deviance - eelmodel_2$deviance
+chidf &lt;- eelmodel_1$df.residual - eelmodel_2$df.residual
+chisq.prob &lt;- 1 - pchisq(modelChi, chidf)
+
+modelChi; chidf; chisq.prob</code></pre>
+<pre><code>## [1] 0.001983528</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre><code>## [1] 0.9644765</code></pre>
+<p> 두 모형의 이탈도 차이는 0.001983528이고 자유도 차이는 1이다. p 값은 0.9644765인데 &gt;.05이므로 유의하지 않다.</p>
+</div>
+<div id="핵심정리" class="section level3">
+<h3>핵심정리</h3>
+<ul>
+<li><p>최종 모형의 전반적인 적합도는 이탈도 통계량과 그와 연관된 카이제곱 통계량으로 평가할 수 있다. 카이제곱 통계량의 유의확률이 .05보다 작으면 그 모형은 자료에 유의한 수준으로 잘 적합하는 것이다.</p></li>
+<li><p>승산비를 통해 모델을 해석한다. <code>exp(model$coefficients)</code> 형태의 명령으로 구할 수 있다. 승산비가 1보다 크다는 것은 예측변수가 증가하면 결과가 발생할 승산도 증가한다는 뜻이다. 반대로, 승산비가 1보다 작다는 것은 예측변수가 증가하면 결과가 발생할 승산이 감소한다는 것이다. 이러한 해석에 신뢰성이 있으려면 승산비의 신뢰구간에 1이 포함되어서는 안 된다.</p></li>
+</ul>
+</div>
+<div id="로지스틱-회귀의-사례별-진단" class="section level3">
+<h3>로지스틱 회귀의 사례별 진단</h3>
+<div id="잔차-구하기" class="section level4">
+<h4>잔차 구하기</h4>
+<p> <code>resid()</code> 함수를 이용해 로지스틱 회귀 모델의 잔차를 구한다.</p>
+<p> <code>fitted()</code> 함수를 이용해 로지스틱 회귀의 적합값을 구한다. 이 적합값은 선형회귀의 값과 의미가 다른데, 각 예측변수 값이 주어졌을 때 해당 Y값이 발생할 확률을 예측한 값이다.</p>
+<p><span class="math display">\[P(Y) = \frac{1}{1 + exp(-(b_{0} + b_{1}X_{1i} + b_{2}X_{2i} + ... + b_{n}X_{n}))}\]</span></p>
+<p> 또한, 예측된 그룹 소속도(predicted group membership)를 회귀모형과 각 참가자에 대한 가장 가능도 높은 결과에 기초해서 계산할 수도 있다.</p>
+<p> 이 값들을 담은 변수들을 데이터 데이터프레임에 추가하고 여러 검정을 수행할 수 있다.</p>
+<pre class="r"><code>eelData$predicted.prob &lt;- fitted(eelmodel_1)
+eelData$standized.residuals &lt;- rstandard(eelmodel_1)
+eelData$studentized.residuals &lt;- rstudent(eelmodel_1)
+# eelData$dfbeta &lt;- dfbeta(eelmodel_1)
+eelData$diffit &lt;- dffits(eelmodel_1)
+eelData$leverage &lt;- hatvalues(eelmodel_1)</code></pre>
+</div>
+<div id="예측된-확률" class="section level4">
+<h4>예측된 확률</h4>
+<pre class="r"><code>eelData %&gt;%
+  as_tibble() %&gt;%
+  select(Cured, Intervention, Duration, predicted.prob) </code></pre>
+<pre><code>## # A tibble: 113 x 4
+##    Cured     Intervention Duration predicted.prob
+##    &lt;fct&gt;     &lt;fct&gt;           &lt;int&gt;          &lt;dbl&gt;
+##  1 Not Cured No Treatment        7          0.429
+##  2 Not Cured No Treatment        7          0.429
+##  3 Not Cured No Treatment        6          0.429
+##  4 Cured     No Treatment        8          0.429
+##  5 Cured     Intervention        7          0.719
+##  6 Cured     No Treatment        6          0.429
+##  7 Not Cured Intervention        7          0.719
+##  8 Cured     Intervention        7          0.719
+##  9 Cured     No Treatment        8          0.429
+## 10 Not Cured No Treatment        7          0.429
+## # ... with 103 more rows</code></pre>
+<p> 현재 치료에 대한 유의미한 변수는 <code>Intervention</code> 뿐이다.</p>
+<p> 위의 표를 살펴보면, 환자가 처치를 받지 않았을 때(No Treatment, Intervention = 0) 치료될 확률은 .429이다. 약 43%가 치료된다. 그러나 개입이 있었다면 환자가 치료될 확률은 .719이다.</p>
+</div>
+<div id="잔차의-해석" class="section level4">
+<h4>잔차의 해석</h4>
+<p> 이 모형이 정말로 좋은 모형인지 확인하려면 잔차들을 조사해야 한다. 그 이유는 다음과 같다.
+- 모형이 잘 적합하지 않는 자료점들을 격리
+- 모형에 필요 이상으로 큰 영향을 주는 자료점들을 격리</p>
+<pre class="r"><code>eelData %&gt;%
+  select(leverage, studentized.residuals)</code></pre>
+<pre><code>##       leverage studentized.residuals
+## 1   0.01785714            -1.0643627
+## 2   0.01785714            -1.0643627
+## 3   0.01785714            -1.0643627
+## 4   0.01785714             1.3110447
+## 5   0.01754386             0.8160435
+## 6   0.01785714             1.3110447
+## 7   0.01754386            -1.6083171
+## 8   0.01754386             0.8160435
+## 9   0.01785714             1.3110447
+## 10  0.01785714            -1.0643627
+## 11  0.01754386             0.8160435
+## 12  0.01785714             1.3110447
+## 13  0.01785714             1.3110447
+## 14  0.01754386            -1.6083171
+## 15  0.01785714            -1.0643627
+## 16  0.01785714            -1.0643627
+## 17  0.01754386             0.8160435
+## 18  0.01754386            -1.6083171
+## 19  0.01754386             0.8160435
+## 20  0.01754386             0.8160435
+## 21  0.01785714            -1.0643627
+## 22  0.01754386             0.8160435
+## 23  0.01754386             0.8160435
+## 24  0.01785714            -1.0643627
+## 25  0.01754386             0.8160435
+## 26  0.01754386             0.8160435
+## 27  0.01785714             1.3110447
+## 28  0.01785714             1.3110447
+## 29  0.01754386             0.8160435
+## 30  0.01754386             0.8160435
+## 31  0.01785714            -1.0643627
+## 32  0.01785714             1.3110447
+## 33  0.01754386             0.8160435
+## 34  0.01754386            -1.6083171
+## 35  0.01754386             0.8160435
+## 36  0.01785714             1.3110447
+## 37  0.01785714             1.3110447
+## 38  0.01754386            -1.6083171
+## 39  0.01785714             1.3110447
+## 40  0.01754386             0.8160435
+## 41  0.01785714             1.3110447
+## 42  0.01754386            -1.6083171
+## 43  0.01754386             0.8160435
+## 44  0.01754386            -1.6083171
+## 45  0.01785714            -1.0643627
+## 46  0.01785714            -1.0643627
+## 47  0.01785714            -1.0643627
+## 48  0.01754386            -1.6083171
+## 49  0.01754386            -1.6083171
+## 50  0.01785714             1.3110447
+## 51  0.01754386             0.8160435
+## 52  0.01754386             0.8160435
+## 53  0.01754386             0.8160435
+## 54  0.01785714             1.3110447
+## 55  0.01785714            -1.0643627
+## 56  0.01754386             0.8160435
+## 57  0.01754386             0.8160435
+## 58  0.01785714            -1.0643627
+## 59  0.01754386             0.8160435
+## 60  0.01754386             0.8160435
+## 61  0.01785714             1.3110447
+## 62  0.01785714            -1.0643627
+## 63  0.01785714             1.3110447
+## 64  0.01754386            -1.6083171
+## 65  0.01754386             0.8160435
+## 66  0.01785714            -1.0643627
+## 67  0.01785714            -1.0643627
+## 68  0.01785714             1.3110447
+## 69  0.01785714            -1.0643627
+## 70  0.01785714            -1.0643627
+## 71  0.01754386             0.8160435
+## 72  0.01785714            -1.0643627
+## 73  0.01754386            -1.6083171
+## 74  0.01754386             0.8160435
+## 75  0.01754386             0.8160435
+## 76  0.01785714             1.3110447
+## 77  0.01754386             0.8160435
+## 78  0.01754386            -1.6083171
+## 79  0.01785714             1.3110447
+## 80  0.01754386            -1.6083171
+## 81  0.01785714             1.3110447
+## 82  0.01785714            -1.0643627
+## 83  0.01754386             0.8160435
+## 84  0.01754386             0.8160435
+## 85  0.01754386            -1.6083171
+## 86  0.01754386             0.8160435
+## 87  0.01785714             1.3110447
+## 88  0.01754386            -1.6083171
+## 89  0.01754386             0.8160435
+## 90  0.01785714            -1.0643627
+## 91  0.01754386             0.8160435
+## 92  0.01785714            -1.0643627
+## 93  0.01754386             0.8160435
+## 94  0.01754386             0.8160435
+## 95  0.01754386            -1.6083171
+## 96  0.01754386             0.8160435
+## 97  0.01785714             1.3110447
+## 98  0.01785714            -1.0643627
+## 99  0.01785714            -1.0643627
+## 100 0.01754386             0.8160435
+## 101 0.01785714            -1.0643627
+## 102 0.01785714            -1.0643627
+## 103 0.01754386             0.8160435
+## 104 0.01785714             1.3110447
+## 105 0.01785714            -1.0643627
+## 106 0.01785714             1.3110447
+## 107 0.01785714            -1.0643627
+## 108 0.01785714            -1.0643627
+## 109 0.01754386             0.8160435
+## 110 0.01754386             0.8160435
+## 111 0.01785714            -1.0643627
+## 112 0.01785714            -1.0643627
+## 113 0.01754386             0.8160435</code></pre>
+<pre class="r"><code>ggplot(eelData, aes(y = studentized.residuals)) +
+  geom_boxplot() + 
+  coord_flip()</code></pre>
+<p><img src="/post/2020-04-23-Logistic_Regression_Evaluation_LL_files/figure-html/unnamed-chunk-32-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p> 스튜던트화 잔차가 <span class="math inline">\(\pm2\)</span> 이내 이므로 괜찮다고 할 수 있다.</p>
+<pre class="r"><code>ggplot(eelData, aes(y = leverage)) +
+  geom_boxplot() + 
+  coord_flip()</code></pre>
+<p><img src="/post/2020-04-23-Logistic_Regression_Evaluation_LL_files/figure-html/unnamed-chunk-33-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p> 지렛대 통계량이 계산된 기대값인 .018과 아주 가깝다.</p>
+<p><span class="math display">\[\frac{k + 1}{N} = \frac{1 + 1}{113} = .018\]</span></p>
+</div>
+</div>
+<div id="핵심정리-1" class="section level3">
+<h3>핵심정리</h3>
+<ul>
+<li><p>표준화잔차들을 살펴보아서 절대값이 2보다 큰 사례들이 전체의 5%를 넘기지 않는지, 절댓값이 2.5보다 큰 사례들이 전체의 약 1%를 넘지는 않는지 확인한다. 절대값이 3보다 큰 사례는 이상치일 수 있다.</p></li>
+<li><p>평균지렛대 값을 계산하고, 지렛대 값이 평균의 2배 또는 3배 이상인 사례들을 찾는다.</p></li>
+<li><p>DFBeta의 절대값이 1보다 큰 사례들을</p></li>
+</ul>
+</div>
+<div id="효과크기의-계산" class="section level3">
+<h3>효과크기의 계산</h3>
+<p> 승산비를 효과크기의 측도로 사용하면 된다.</p>
+</div>
+</div>
+<div id="로지스틱-회귀분석-보고-방법" class="section level2">
+<h2>로지스틱 회귀분석 보고 방법</h2>
+<p> 가능한 결과를 표로 작성한다. 이 때 베타값들과 해당 표준오차 및 유의확률, 그리고 모형에 관한 몇 가지 일반적인 통계량(<span class="math inline">\(R^{2}\)</span>과 적합도 통계량) 등을 명시하도록 한다. 그 외 승산비들과 그 신뢰구간도 보고하도록 하자.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center"></th>
+<th align="center">B(SE)</th>
+<th align="center">하계</th>
+<th align="center">승산비</th>
+<th align="center">상계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">포함된 변수</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td align="center">상수</td>
+<td align="center">-0.29 (.27)</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td align="center">개입</td>
+<td align="center">1.23 (.40)</td>
+<td align="center">1.56</td>
+<td align="center">3.42</td>
+<td align="center">7.48</td>
+</tr>
+</tbody>
+</table>
+<p>비고, <span class="math inline">\(R^{2} = .06\)</span> (호스머-렘쇼), .08 (콕스-스넬), .11(네이글커크). 모형 <span class="math inline">\(\chi^{2}(1) = 9.93, \ p &lt; .01 *\)</span></p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

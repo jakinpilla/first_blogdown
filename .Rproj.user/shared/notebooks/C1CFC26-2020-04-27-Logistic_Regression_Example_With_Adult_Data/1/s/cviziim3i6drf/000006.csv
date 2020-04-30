@@ -1,0 +1,3 @@
+"0","adult %>%"
+"0","  filter(workclass != '?') %>% # 데이터에 '?'가 있어 제외시켰습니다."
+"0","  count(workclass) -> work_class_freq_df ; work_class_freq_df"

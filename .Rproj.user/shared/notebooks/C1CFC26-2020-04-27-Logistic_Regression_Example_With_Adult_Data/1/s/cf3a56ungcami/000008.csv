@@ -1,0 +1,6 @@
+"0","df_1 %>%"
+"0","  ggplot(aes(workclass, n, fill = wage)) + geom_bar(stat = 'identity', position = 'fill') +"
+"0","  theme_minimal() +"
+"0","  geom_text(aes(y = n, label = y_label), vjust = 0, colour = 'black', position = position_fill(vjust = .5)) +"
+"0","  scale_fill_manual(values = c('steelblue', 'red'), aesthetics = 'fill') +"
+"0","  coord_flip() -> p6; ggplotly(p6)"

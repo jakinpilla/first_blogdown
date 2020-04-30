@@ -1,0 +1,5 @@
+"0","myfun_2 <- function(mu_var) {log(mu_var / (1 - mu_var))};"
+"0","ggplot(data.frame(x= c(0, 1)), aes(x=x)) + "
+"0","  stat_function(fun = myfun_2, geom=""line"", size = 1.2, color = 'steelblue') + "
+"0","  labs(x = ""mu"", y = ""Y"") +"
+"0","  theme_minimal() -> p_3; ggplotly(p_3)"

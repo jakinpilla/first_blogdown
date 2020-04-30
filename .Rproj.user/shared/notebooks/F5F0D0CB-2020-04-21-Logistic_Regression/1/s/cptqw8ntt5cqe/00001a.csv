@@ -1,0 +1,8 @@
+"0","myfun <- function(x_var) {1 / (1 + exp(-x_var))};"
+"0","ggplot(data.frame(x= c(-10, 10)), aes(x=x)) + "
+"0","  stat_function(fun = myfun, geom=""line"", size = 1.2, color = 'steelblue') + "
+"0","  xlab(""Z"") +"
+"0","  ylab(""P(Y)"") +"
+"0","  theme_minimal() -> p1"
+"0",""
+"0","ggplotly(p1)"

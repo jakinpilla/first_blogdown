@@ -1,0 +1,6 @@
+"0","myfun_1 <- function(mu_var) {mu_var / (1 - mu_var)};"
+"0","ggplot(data.frame(x= c(0, 1)), aes(x=x)) + "
+"0","  stat_function(fun = myfun_1, geom=""line"", size = 1.2, color = 'steelblue') + "
+"0","  xlab(""mu"") +"
+"0","  ylab(paste(""odds"")) +"
+"0","  theme_minimal() -> p_2; ggplotly(p_2)"
