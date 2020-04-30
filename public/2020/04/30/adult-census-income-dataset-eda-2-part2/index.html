@@ -85,8 +85,9 @@
 
 <div id="data-loading" class="section level2">
 <h2>Data Loading</h2>
-<p> 먼저 데이터를 불러오겠습니다. 지난 번 포스트에서 전처리한 데이터를 사용합니다. 그 데이터는 adult_1.csv 파일에 저장되어 있습니다.</p>
-<pre class="r"><code>adult &lt;- read_csv(&#39;./data/adult_1.csv&#39;)
+<p> 먼저 데이터를 불러오겠습니다. 지난 번 포스트에서 전처리한 데이터를 사용합니다. 그 데이터는 <a href="https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv">adult_1.csv</a> 파일에 저장되어 있습니다.</p>
+<pre class="r"><code>adult &lt;- read_csv(&#39;https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv&#39;)
+# adult &lt;- read_csv(&#39;./data/adult_1.csv&#39;)
 adult %&gt;% glimpse()</code></pre>
 <pre><code>## Observations: 32,561
 ## Variables: 13

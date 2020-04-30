@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1588242900069.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3296544281",
+    "id" : "B2C03D1",
+    "lastKnownWriteTime" : 1588243497,
+    "last_content_update" : 1588243497198,
+    "path" : "~/first_blogdown/content/post/2020-04-30-Adult_Census_Data_EDA_2.Rmd",
+    "project_path" : "content/post/2020-04-30-Adult_Census_Data_EDA_2.Rmd",
+    "properties" : {
+        "cursorPosition" : "445,0",
+        "scrollLine" : "440"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

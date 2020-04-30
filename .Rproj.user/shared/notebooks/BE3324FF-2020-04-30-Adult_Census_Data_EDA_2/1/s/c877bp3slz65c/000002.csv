@@ -1,0 +1,3 @@
+"0","df_tmp_1000 %>%"
+"0","  select(wage, marital_status, occupation, race, sex) %>%"
+"0","  mutate(wage = ifelse(wage == 0, ""<=50K"", "">50K"")) -> df_tmp_1000_fctr_1"

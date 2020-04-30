@@ -1,0 +1,5 @@
+"0","adult %>%"
+"0","  ggplot(aes(hours_per_week, fill = wage)) + "
+"0","  geom_histogram() +"
+"0","  scale_color_manual(values = c('steelblue', 'red'), aesthetics = 'fill') +"
+"0","  theme_minimal() -> p2; p2"

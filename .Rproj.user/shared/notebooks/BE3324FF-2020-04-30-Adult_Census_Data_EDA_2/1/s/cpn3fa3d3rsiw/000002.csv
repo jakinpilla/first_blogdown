@@ -1,0 +1,6 @@
+"0","adult %>%"
+"0","  ggplot(aes(hours_per_week, fill = wage)) +"
+"0","  geom_density(alpha = .5) +"
+"0","  # scale_x_log10() +"
+"0","  scale_color_manual(values = c('steelblue', 'red'), aesthetics = 'fill') +"
+"0","  theme_minimal() -> p; p"

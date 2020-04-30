@@ -1,0 +1,7 @@
+"0","adult %>%"
+"0","  filter(race %in% c('White', 'Black')) %>%"
+"0","  ggplot(aes(age, fill = wage)) +"
+"0","  geom_density(alpha = .5) + "
+"0","  facet_grid(race ~ sex) +"
+"0","  scale_color_manual(values = c('steelblue', 'red'), aesthetics = 'fill') +"
+"0","  theme_minimal() -> p; p"
