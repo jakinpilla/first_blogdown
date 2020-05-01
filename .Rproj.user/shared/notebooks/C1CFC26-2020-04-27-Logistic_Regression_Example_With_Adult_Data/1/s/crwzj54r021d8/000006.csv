@@ -1,2 +1,0 @@
-"0","work_class_freq_df %>%"
-"0","  ggplot(aes(workclass, n)) + geom_bar(stat = 'identity', fill = 'steelblue') + coord_flip() + theme_minimal()"

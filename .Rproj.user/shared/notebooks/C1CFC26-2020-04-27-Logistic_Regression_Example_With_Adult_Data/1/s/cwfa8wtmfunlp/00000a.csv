@@ -1,4 +1,0 @@
-"0","adult %>%"
-"0","  select(education, education_num) %>%"
-"0","  distinct() %>%"
-"0","  arrange(education_num) -> df_tmp; df_tmp"

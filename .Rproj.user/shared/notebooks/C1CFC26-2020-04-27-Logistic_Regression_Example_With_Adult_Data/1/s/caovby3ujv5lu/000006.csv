@@ -1,8 +1,0 @@
-"0","adult %>%"
-"0","  mutate(wage_num = ifelse(wage == ""<=50K"", 0, 1)) -> df_test"
-"0",""
-"0","cor(df_test$wage_num, adult$fnlwgt)"
-"1","[1]"
-"1"," -0.009462557"
-"1","
-"
