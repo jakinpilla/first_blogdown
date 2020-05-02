@@ -1,4 +1,0 @@
-"0","select_if(df_tmp_1000, is.numeric) %>%"
-"0","  ggpairs() +"
-"0","  theme_minimal() +"
-"0","  theme(axis.text.x = element_text(angle = 45))"

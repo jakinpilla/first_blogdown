@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.69.2" />
+
+
+<title>Logistic Regression 예제: Adult Dataset - My DataScience Blog</title>
+<meta property="og:title" content="Logistic Regression 예제: Adult Dataset - My DataScience Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">Daniel Kim</a></li>
+    
+    <li><a href="https://github.com/jakinpilla">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/jakinpilla">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">11 min read</span>
+    
+
+    <h1 class="article-title">Logistic Regression 예제: Adult Dataset</h1>
+
+    
+    <span class="article-date">2020-05-03</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+<link href="/rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/datatables-binding/datatables.js"></script>
+<link href="/rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="/rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
+
+
+<div id="data-loading-spliting" class="section level2">
+<h2>Data Loading &amp; Spliting</h2>
+<div id="data-loading" class="section level3">
+<h3>Data Loading</h3>
+<p> 먼저 데이터를 불러오겠습니다. 지난 번 포스트에서 전처리한 데이터를 사용합니다. 그 데이터는 <a href="https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv">adult_1.csv</a> 파일에 저장되어 있습니다.</p>
+<pre class="r"><code>adult &lt;- read_csv(&#39;https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv&#39;)
+# adult &lt;- read_csv(&#39;./data/adult_1.csv&#39;)
+adult %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 32,561
+## Columns: 13
+## $ age            &lt;dbl&gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...
+## $ workclass      &lt;chr&gt; &quot;State-gov&quot;, &quot;Self-emp-not-inc&quot;, &quot;Private&quot;, &quot;Private...
+## $ education_num  &lt;dbl&gt; 13, 13, 9, 7, 13, 14, 5, 9, 14, 13, 10, 13, 13, 12, ...
+## $ marital_status &lt;chr&gt; &quot;Never-married&quot;, &quot;Married-civ-spouse&quot;, &quot;Divorced&quot;, &quot;...
+## $ occupation     &lt;chr&gt; &quot;White-Collar&quot;, &quot;White-Collar&quot;, &quot;Blue-Collar&quot;, &quot;Blue...
+## $ relationship   &lt;chr&gt; &quot;Not-in-family&quot;, &quot;Husband&quot;, &quot;Not-in-family&quot;, &quot;Husban...
+## $ race           &lt;chr&gt; &quot;White&quot;, &quot;White&quot;, &quot;White&quot;, &quot;Black&quot;, &quot;Black&quot;, &quot;White&quot;...
+## $ sex            &lt;chr&gt; &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Female&quot;, &quot;Female&quot;, ...
+## $ capital_gain   &lt;dbl&gt; 2174, 0, 0, 0, 0, 0, 0, 0, 14084, 5178, 0, 0, 0, 0, ...
+## $ capital_loss   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+## $ hours_per_week &lt;dbl&gt; 40, 13, 40, 40, 40, 40, 16, 45, 50, 40, 80, 40, 30, ...
+## $ native_country &lt;chr&gt; &quot;United-States&quot;, &quot;United-States&quot;, &quot;United-States&quot;, &quot;...
+## $ wage           &lt;chr&gt; &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;...</code></pre>
+<p> <code>adult</code> 데이터 내에는 많은 경우의 수를 가진 범주형 변수들이 있으므로 먼저 <code>model.matrix()</code> 함수를 통해 범주형 변수들을 <code>dummy variable</code> 들로 변환시켜 주어야 합니다.</p>
+<p> 추후 모델을 훈련시켜주는 함수가 이런 과정을 자동으로 하여주지만 만약 데이터를 train, validation, test로 분리할 때, 이 분리된 3개의 데이터 세트 중 어느 하나가 특정 범주형 변수 내 경우의 값을 포함하지 않을 수 있습니다. 예를 들어 <code>native_country</code> 변수에는 42개의 국가들이 있는데 데이터를 분리할 때 어느 한 데이터세트에 이 42개 국가 중 어떤 특정 국가의 정보가 전혀 들어가지 않을 수 있습니다. 이럴 경우 모델 학습, 평가 진행간 데이터의 구조가 서로 달라 오류를 발생할 수 있습니다.</p>
+<p> 그래서 아에 처음부터 <code>model.matrix()</code> 함수를 이용해 데이터의 구조를 동일하게 맞추어 주는 것이 좋습니다.</p>
+<pre class="r"><code># wage 변수는 목적변수이므로 model.matrix() 함수를 적용할 땐 제외합니다.
+model.matrix(~ . -wage, adult ) %&gt;%
+ as_tibble() -&gt; df_1 # matrix 자료형을 tibble() 형으로 변환합니다.
+
+adult %&gt;%
+  select(wage) %&gt;% # 목적변수만 선택합니다.
+  bind_cols(df_1) %&gt;%  # 위에서 생성한 데이터를 결합합니다.
+  select(-`(Intercept)`) -&gt; adult_mm # 위에서 생성한 데이터 컬럼 중 (Intercept) 컬럼은 제외합니다.</code></pre>
+<pre class="r"><code>adult_mm %&gt;% dim()</code></pre>
+<pre><code>## [1] 32561    76</code></pre>
+<p> model.matrix()를 통해 새롭게 만들어진 데이터는 총 76개의 컬럼을 가지고 있습니다.</p>
+<pre class="r"><code>adult_mm %&gt;% colnames()</code></pre>
+<pre><code>##  [1] &quot;wage&quot;                                    
+##  [2] &quot;age&quot;                                     
+##  [3] &quot;workclassFederal-gov&quot;                    
+##  [4] &quot;workclassLocal-gov&quot;                      
+##  [5] &quot;workclassNever-worked&quot;                   
+##  [6] &quot;workclassPrivate&quot;                        
+##  [7] &quot;workclassSelf-emp-inc&quot;                   
+##  [8] &quot;workclassSelf-emp-not-inc&quot;               
+##  [9] &quot;workclassState-gov&quot;                      
+## [10] &quot;workclassWithout-pay&quot;                    
+## [11] &quot;education_num&quot;                           
+## [12] &quot;marital_statusMarried-AF-spouse&quot;         
+## [13] &quot;marital_statusMarried-civ-spouse&quot;        
+## [14] &quot;marital_statusMarried-spouse-absent&quot;     
+## [15] &quot;marital_statusNever-married&quot;             
+## [16] &quot;marital_statusSeparated&quot;                 
+## [17] &quot;marital_statusWidowed&quot;                   
+## [18] &quot;occupationOther/Unknown&quot;                 
+## [19] &quot;occupationProfessional&quot;                  
+## [20] &quot;occupationSales&quot;                         
+## [21] &quot;occupationService&quot;                       
+## [22] &quot;occupationWhite-Collar&quot;                  
+## [23] &quot;relationshipNot-in-family&quot;               
+## [24] &quot;relationshipOther-relative&quot;              
+## [25] &quot;relationshipOwn-child&quot;                   
+## [26] &quot;relationshipUnmarried&quot;                   
+## [27] &quot;relationshipWife&quot;                        
+## [28] &quot;raceAsian-Pac-Islander&quot;                  
+## [29] &quot;raceBlack&quot;                               
+## [30] &quot;raceOther&quot;                               
+## [31] &quot;raceWhite&quot;                               
+## [32] &quot;sexMale&quot;                                 
+## [33] &quot;capital_gain&quot;                            
+## [34] &quot;capital_loss&quot;                            
+## [35] &quot;hours_per_week&quot;                          
+## [36] &quot;native_countryCambodia&quot;                  
+## [37] &quot;native_countryCanada&quot;                    
+## [38] &quot;native_countryChina&quot;                     
+## [39] &quot;native_countryColumbia&quot;                  
+## [40] &quot;native_countryCuba&quot;                      
+## [41] &quot;native_countryDominican-Republic&quot;        
+## [42] &quot;native_countryEcuador&quot;                   
+## [43] &quot;native_countryEl-Salvador&quot;               
+## [44] &quot;native_countryEngland&quot;                   
+## [45] &quot;native_countryFrance&quot;                    
+## [46] &quot;native_countryGermany&quot;                   
+## [47] &quot;native_countryGreece&quot;                    
+## [48] &quot;native_countryGuatemala&quot;                 
+## [49] &quot;native_countryHaiti&quot;                     
+## [50] &quot;native_countryHoland-Netherlands&quot;        
+## [51] &quot;native_countryHonduras&quot;                  
+## [52] &quot;native_countryHong&quot;                      
+## [53] &quot;native_countryHungary&quot;                   
+## [54] &quot;native_countryIndia&quot;                     
+## [55] &quot;native_countryIran&quot;                      
+## [56] &quot;native_countryIreland&quot;                   
+## [57] &quot;native_countryItaly&quot;                     
+## [58] &quot;native_countryJamaica&quot;                   
+## [59] &quot;native_countryJapan&quot;                     
+## [60] &quot;native_countryLaos&quot;                      
+## [61] &quot;native_countryMexico&quot;                    
+## [62] &quot;native_countryNicaragua&quot;                 
+## [63] &quot;native_countryOutlying-US(Guam-USVI-etc)&quot;
+## [64] &quot;native_countryPeru&quot;                      
+## [65] &quot;native_countryPhilippines&quot;               
+## [66] &quot;native_countryPoland&quot;                    
+## [67] &quot;native_countryPortugal&quot;                  
+## [68] &quot;native_countryPuerto-Rico&quot;               
+## [69] &quot;native_countryScotland&quot;                  
+## [70] &quot;native_countrySouth&quot;                     
+## [71] &quot;native_countryTaiwan&quot;                    
+## [72] &quot;native_countryThailand&quot;                  
+## [73] &quot;native_countryTrinadad&amp;Tobago&quot;           
+## [74] &quot;native_countryUnited-States&quot;             
+## [75] &quot;native_countryVietnam&quot;                   
+## [76] &quot;native_countryYugoslavia&quot;</code></pre>
+<p> <code>native_country</code> 컬럼 내 국가들의 수가 워낙 많아 이 컬럼의 값들을 dummy variable로 만들기 위해 생성된 컬럼의 수가 41개 생성된네요… 원래 42개의 국가가 있었으므로 42개의 경우의 수를 표현하기 위한 컬럼의 수는 1개가 적은 41개입니다.</p>
+</div>
+<div id="data-spliting" class="section level3">
+<h3>Data Spliting</h3>
+<p> 로지스틱 회귀모델을 만들어 보려합니다. 그런데 모델을 학습시키기 위해선 데이터를 1. <code>train_data</code>, 2. <code>validaton_data</code>, 그리고 3. <code>test_data</code>로 분리해야 합니다. 게다가 우리의 데이터는 목적변수인 wage가 한쪽으로 치우쳐진 <code>unbalanced</code> 데이터입니다.</p>
+<pre class="r"><code>adult_mm %&gt;% 
+  count(wage) %&gt;%
+  ggplot(aes(wage, n, fill = wage)) + geom_bar(stat = &#39;identity&#39;) +
+  scale_fill_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() -&gt; p ; ggplotly(p)</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"data":[{"orientation":"v","width":0.9,"base":0,"x":[1],"y":[24720],"text":"wage: <=50K<br />n: 24720<br />wage: <=50K","type":"bar","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":"<=50K","legendgroup":"<=50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":0.9,"base":0,"x":[2],"y":[7841],"text":"wage: >50K<br />n:  7841<br />wage: >50K","type":"bar","marker":{"autocolorscale":false,"color":"rgba(255,0,0,1)","line":{"width":1.88976377952756,"color":"transparent"}},"name":">50K","legendgroup":">50K","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":54.7945205479452},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.4,2.6],"tickmode":"array","ticktext":["<=50K",">50K"],"tickvals":[1,2],"categoryorder":"array","categoryarray":["<=50K",">50K"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"wage","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-1236,25956],"tickmode":"array","ticktext":["0","5000","10000","15000","20000","25000"],"tickvals":[0,5000,10000,15000,20000,25000],"categoryorder":"array","categoryarray":["0","5000","10000","15000","20000","25000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"n","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895},"y":0.96751968503937},"annotations":[{"text":"wage","x":1.02,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"left","yanchor":"bottom","legendTitle":true}],"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"16b859391224":{"x":{},"y":{},"fill":{},"type":"bar"}},"cur_data":"16b859391224","visdat":{"16b859391224":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p> 데이터를 분리할 때 이런 <code>unbalanced</code> 데이터 같은 경우는 분리한 후에도 이런 비율이 어느정도 일치하게 분리하는 것이 필요합니다. 지금 예에선 <span class="math inline">\(&lt;=50K\)</span> : <span class="math inline">\(&gt;50K\)</span> 가 3:1 정도의 비율을 나타냅니다. 그래서 <code>train_data</code>에서도 3:1, <code>validation_data</code>에서도 3:1, <code>test_data</code>에서도 3:1의 비율이 유지되도록 분리하여 진행하는 것이 좋습니다.</p>
+<p> 그래서 저는 주로 <code>caret::creatDataPartition()</code>이란 함수를 자주 이용합니다. 지금부터는 이 함수를 이용해 <code>train_data:validation_data:test_data</code>를 전체 데이터 크기에서 각각 6:2:2로 분리해되 각 분리된 세트 내 목적변수 <code>wage의</code> 비율은 3:1로 유지하면 분리하도록 하겠습니다.</p>
+<pre class="r"><code>set.seed(2020)
+df &lt;- adult_mm
+
+train_idx &lt;- createDataPartition(df$wage, p = .6, list = F)[, 1]
+resid_idx &lt;- setdiff(1:nrow(df), train_idx)
+resid_df &lt;- df[resid_idx, ]
+
+val_idx &lt;- createDataPartition(resid_df$wage, p = .5, list = F)[, 1]
+test_idx &lt;- setdiff(1:nrow(resid_df), val_idx)
+
+train_data &lt;- df[train_idx, ]
+val_data &lt;- resid_df[val_idx, ]
+test_data &lt;- resid_df[test_idx, ]</code></pre>
+<p> 위에서 data spliting을 위해 사용한 코드에 대한 자세한 해석은 Data Spliting 방법을 다룬 별도의 post에서 설명하도록 하겠습니다. 일단 지금은 분리된 데이터 세트별 wage의 비율을 살펴보겠습니다.</p>
+<pre class="r"><code>train_data %&gt;% 
+  count(wage) %&gt;%
+  ggplot(aes(wage, n, fill = wage)) + geom_bar(stat = &#39;identity&#39;) +
+  scale_fill_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;) +
+  theme(axis.title.y = element_blank()) -&gt; p1</code></pre>
+<pre class="r"><code>val_data %&gt;%
+  count(wage) %&gt;%
+  ggplot(aes(wage, n, fill = wage)) + geom_bar(stat = &#39;identity&#39;) +
+  scale_fill_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;) +
+  theme(axis.title.y = element_blank()) -&gt; p2</code></pre>
+<pre class="r"><code>test_data %&gt;%
+  count(wage) %&gt;%
+  ggplot(aes(wage, n, fill = wage)) + geom_bar(stat = &#39;identity&#39;) +
+  scale_fill_manual(values = c(&#39;steelblue&#39;, &#39;red&#39;), aesthetics = &#39;fill&#39;) +
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;) +
+  theme(axis.title.y = element_blank()) -&gt; p3</code></pre>
+<pre class="r"><code>grid.arrange(p1, p2, p3, ncol = 3)</code></pre>
+<p><img src="/post/2020-04-30-Logistic_Regression_Example_with_Adult_Dataset_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p> train_data, validation_data, test_data 등 3가지 dataset에서 모두 wage가 약 3:1의 비율을 잘 유지하며 분리되었습니다. 이제부터는 이 중 train_data를 이용해 로지스틱 회귀 모델을 만들어 보겠습니다.</p>
+</div>
+</div>
+<div id="model-training" class="section level2">
+<h2>Model Training</h2>
+<p> 먼저 목적변수인 wage 변수를 0과 1로 변환합니다. 항상 관심있는 대상을 1로 둡니다. 저는 중산층인 경우를 1로, 아닌 경우를 0으로 두어 모델을 형성하려 합니다.</p>
+<pre class="r"><code>train_data %&gt;%
+  mutate(wage = ifelse(wage == &quot;&lt;=50K&quot;, 0, 1)) -&gt; train_data_1
+
+df &lt;- train_data_1 %&gt;% head(100)
+
+DT::datatable(df, 
+              options = list(
+                scrollX = TRUE,
+                scrollCollapse = TRUE
+              ))</code></pre>
+<div id="htmlwidget-2" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100"],[0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],[39,38,53,28,37,52,34,32,38,43,40,54,35,59,19,54,30,48,21,31,24,25,41,29,25,18,47,50,46,35,41,30,30,48,42,29,36,28,53,49,31,29,79,27,67,18,31,46,59,53,49,33,30,43,57,37,28,34,48,32,76,44,47,20,29,17,30,31,42,38,56,28,53,56,55,22,40,30,29,19,47,37,27,20,61,27,45,70,36,64,43,34,33,21,23,29,42,25,28,45],[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,1,1,1,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,0,1,0,1,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[13,9,7,13,14,9,4,9,7,14,16,9,5,9,9,10,10,7,10,5,13,9,11,11,10,9,15,13,3,11,9,9,13,9,16,10,9,10,9,10,13,13,10,9,6,7,4,9,9,9,9,14,5,16,11,10,10,13,12,9,14,13,14,10,9,6,7,9,9,15,9,10,5,10,10,9,13,13,13,10,13,13,11,10,9,10,11,10,9,7,10,9,13,9,13,9,13,9,9,14],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,1,1,1,1,1,0,1,0,1,0,1,0,0,1,1,0,0,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,0,0,1,0,0,1,0,0,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,0,1,0,1,0,1,1,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,1,1,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1,0,1,1,1,0,0,0,1,1,1,1,0,0,1,1,0],[0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],[0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],[1,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,0,0,1,0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,0],[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,1,1,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,0,0,1,1,0,1,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1],[1,1,1,0,0,1,1,1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,1,0,1,0,0,1,0,1,1,1,0,0,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,0,0,1,0,1,0,0,0,1,1,1,1,0,0,1],[2174,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5013,2407,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15024,0,0,0,34095,0,0,0,0,0,4064,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1902,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1887,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1564,0,0,2179,0,0,0,0,0,0,0,0,0,0],[40,40,40,40,40,45,45,40,50,45,60,20,40,40,40,60,40,40,40,43,50,35,40,43,40,30,60,55,40,40,48,40,40,40,45,58,40,40,40,50,40,70,20,40,2,22,40,40,48,35,40,50,40,50,40,40,25,40,40,40,40,60,50,40,40,32,40,40,40,40,50,25,50,50,56,41,60,40,50,35,40,50,35,20,40,40,40,40,24,40,40,40,40,35,40,60,50,40,40,40],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>wage<\/th>\n      <th>age<\/th>\n      <th>workclassFederal-gov<\/th>\n      <th>workclassLocal-gov<\/th>\n      <th>workclassNever-worked<\/th>\n      <th>workclassPrivate<\/th>\n      <th>workclassSelf-emp-inc<\/th>\n      <th>workclassSelf-emp-not-inc<\/th>\n      <th>workclassState-gov<\/th>\n      <th>workclassWithout-pay<\/th>\n      <th>education_num<\/th>\n      <th>marital_statusMarried-AF-spouse<\/th>\n      <th>marital_statusMarried-civ-spouse<\/th>\n      <th>marital_statusMarried-spouse-absent<\/th>\n      <th>marital_statusNever-married<\/th>\n      <th>marital_statusSeparated<\/th>\n      <th>marital_statusWidowed<\/th>\n      <th>occupationOther/Unknown<\/th>\n      <th>occupationProfessional<\/th>\n      <th>occupationSales<\/th>\n      <th>occupationService<\/th>\n      <th>occupationWhite-Collar<\/th>\n      <th>relationshipNot-in-family<\/th>\n      <th>relationshipOther-relative<\/th>\n      <th>relationshipOwn-child<\/th>\n      <th>relationshipUnmarried<\/th>\n      <th>relationshipWife<\/th>\n      <th>raceAsian-Pac-Islander<\/th>\n      <th>raceBlack<\/th>\n      <th>raceOther<\/th>\n      <th>raceWhite<\/th>\n      <th>sexMale<\/th>\n      <th>capital_gain<\/th>\n      <th>capital_loss<\/th>\n      <th>hours_per_week<\/th>\n      <th>native_countryCambodia<\/th>\n      <th>native_countryCanada<\/th>\n      <th>native_countryChina<\/th>\n      <th>native_countryColumbia<\/th>\n      <th>native_countryCuba<\/th>\n      <th>native_countryDominican-Republic<\/th>\n      <th>native_countryEcuador<\/th>\n      <th>native_countryEl-Salvador<\/th>\n      <th>native_countryEngland<\/th>\n      <th>native_countryFrance<\/th>\n      <th>native_countryGermany<\/th>\n      <th>native_countryGreece<\/th>\n      <th>native_countryGuatemala<\/th>\n      <th>native_countryHaiti<\/th>\n      <th>native_countryHoland-Netherlands<\/th>\n      <th>native_countryHonduras<\/th>\n      <th>native_countryHong<\/th>\n      <th>native_countryHungary<\/th>\n      <th>native_countryIndia<\/th>\n      <th>native_countryIran<\/th>\n      <th>native_countryIreland<\/th>\n      <th>native_countryItaly<\/th>\n      <th>native_countryJamaica<\/th>\n      <th>native_countryJapan<\/th>\n      <th>native_countryLaos<\/th>\n      <th>native_countryMexico<\/th>\n      <th>native_countryNicaragua<\/th>\n      <th>native_countryOutlying-US(Guam-USVI-etc)<\/th>\n      <th>native_countryPeru<\/th>\n      <th>native_countryPhilippines<\/th>\n      <th>native_countryPoland<\/th>\n      <th>native_countryPortugal<\/th>\n      <th>native_countryPuerto-Rico<\/th>\n      <th>native_countryScotland<\/th>\n      <th>native_countrySouth<\/th>\n      <th>native_countryTaiwan<\/th>\n      <th>native_countryThailand<\/th>\n      <th>native_countryTrinadad&amp;Tobago<\/th>\n      <th>native_countryUnited-States<\/th>\n      <th>native_countryVietnam<\/th>\n      <th>native_countryYugoslavia<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"scrollCollapse":true,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p> 자 그럼 한번 로지스틱 회귀모델을 훈련시켜 보겠습니다. 이 때 사용하는 함수는 glm() 함수입니다. 이 때 <code>family</code> 인자 값을 binomial로 하면 로지스틱 회귀모델이 생성됩니다.</p>
+<pre class="r"><code>adult_logistic_m &lt;- glm(wage ~ ., data = train_data_1, family = binomial)</code></pre>
+<pre class="r"><code>adult_logistic_m &lt;- glm(wage ~ ., data = train_data_1, family = &#39;binomial&#39;)</code></pre>
+<p> family = binomial와 같이 binomial에 따옴표를 붙이지 않고 작성해도 되고 family = “binomial”와 같이 따옴표를 붙여서 작성해도 됩니다.</p>
+<p> 위의 모델에 summary() 함수를 취하면 다음과 같은 결과를 얻습니다.</p>
+<pre class="r"><code># summary(adult_logistic_m)</code></pre>
+<pre><code>Coefficients: (1 not defined because of singularities)
+                                             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                                -1.038e+01  2.018e+00  -5.145 2.68e-07 ***
+age                                         2.638e-02  2.061e-03  12.800  &lt; 2e-16 ***
+`workclassFederal-gov`                      6.502e-01  1.943e+00   0.335 0.737883    
+`workclassLocal-gov`                        1.548e-01  1.948e+00   0.079 0.936659    
+`workclassNever-worked`                    -1.060e+01  3.214e+02  -0.033 0.973699    
+workclassPrivate                            2.666e-01  1.946e+00   0.137 0.891070    
+`workclassSelf-emp-inc`                     4.003e-01  1.949e+00   0.205 0.837280    
+`workclassSelf-emp-not-inc`                -2.753e-01  1.948e+00  -0.141 0.887612    
+`workclassState-gov`                        9.628e-03  1.949e+00   0.005 0.996059    
+`workclassWithout-pay`                     -1.282e+01  2.265e+02  -0.057 0.954866    
+education_num                               3.005e-01  1.170e-02  25.688  &lt; 2e-16 ***
+`marital_statusMarried-AF-spouse`           2.545e+00  7.004e-01   3.633 0.000280 ***
+`marital_statusMarried-civ-spouse`          1.919e+00  3.555e-01   5.397 6.76e-08 ***
+`marital_statusMarried-spouse-absent`      -1.970e-01  3.073e-01  -0.641 0.521531    
+`marital_statusNever-married`              -4.446e-01  1.130e-01  -3.933 8.39e-05 ***
+marital_statusSeparated                    -2.030e-01  2.209e-01  -0.919 0.358222    
+marital_statusWidowed                       6.916e-03  2.067e-01   0.033 0.973301    
+`occupationOther/Unknown`                  -2.551e-01  1.943e+00  -0.131 0.895532    
+occupationProfessional                      7.114e-01  8.280e-02   8.592  &lt; 2e-16 ***
+occupationSales                             4.449e-01  7.837e-02   5.677 1.37e-08 ***
+occupationService                           2.924e-01  8.258e-02   3.541 0.000399 ***
+`occupationWhite-Collar`                    7.519e-01  6.506e-02  11.557  &lt; 2e-16 ***
+`relationshipNot-in-family`                 2.383e-01  3.521e-01   0.677 0.498471    
+`relationshipOther-relative`               -5.698e-01  3.207e-01  -1.777 0.075594 .  
+`relationshipOwn-child`                    -9.190e-01  3.508e-01  -2.620 0.008806 ** 
+relationshipUnmarried                       1.080e-01  3.726e-01   0.290 0.771956    
+relationshipWife                            1.339e+00  1.311e-01  10.211  &lt; 2e-16 ***
+`raceAsian-Pac-Islander`                    5.525e-01  3.469e-01   1.592 0.111307    
+raceBlack                                   3.903e-01  2.969e-01   1.314 0.188738    
+raceOther                                   2.853e-02  4.449e-01   0.064 0.948863    
+raceWhite                                   5.699e-01  2.829e-01   2.015 0.043954 *  
+sexMale                                     9.897e-01  1.025e-01   9.659  &lt; 2e-16 ***
+capital_gain                                3.109e-04  1.312e-05  23.699  &lt; 2e-16 ***
+capital_loss                                7.023e-04  4.766e-05  14.735  &lt; 2e-16 ***
+hours_per_week                              2.987e-02  2.032e-03  14.700  &lt; 2e-16 ***
+native_countryCambodia                      5.550e-01  9.024e-01   0.615 0.538501    
+native_countryCanada                        4.521e-01  3.734e-01   1.211 0.226057    
+native_countryChina                        -2.884e-01  4.695e-01  -0.614 0.539060    
+native_countryColumbia                     -2.582e+00  1.129e+00  -2.287 0.022208 *  
+native_countryCuba                          1.541e-01  4.761e-01   0.324 0.746162    
+`native_countryDominican-Republic`         -9.499e-01  1.084e+00  -0.876 0.380833    
+native_countryEcuador                       3.846e-01  7.560e-01   0.509 0.610968    
+`native_countryEl-Salvador`                -9.204e-01  8.666e-01  -1.062 0.288220    
+native_countryEngland                       1.168e-01  4.313e-01   0.271 0.786613    
+native_countryFrance                        6.175e-01  6.372e-01   0.969 0.332484    
+native_countryGermany                       5.722e-01  3.564e-01   1.605 0.108407    
+native_countryGreece                       -1.758e+00  8.158e-01  -2.155 0.031134 *  
+native_countryGuatemala                     4.807e-01  9.962e-01   0.483 0.629435    
+native_countryHaiti                        -1.367e-01  8.497e-01  -0.161 0.872152    
+`native_countryHoland-Netherlands`                 NA         NA      NA       NA    
+native_countryHonduras                     -1.046e+01  2.587e+02  -0.040 0.967754    
+native_countryHong                          1.518e-02  7.830e-01   0.019 0.984533    
+native_countryHungary                       5.598e-01  1.008e+00   0.555 0.578759    
+native_countryIndia                        -2.618e-01  4.017e-01  -0.652 0.514557    
+native_countryIran                          4.326e-01  5.469e-01   0.791 0.428963    
+native_countryIreland                       1.012e+00  7.864e-01   1.287 0.198092    
+native_countryItaly                         7.147e-01  4.793e-01   1.491 0.135893    
+native_countryJamaica                      -1.421e-01  7.108e-01  -0.200 0.841558    
+native_countryJapan                         3.940e-01  5.505e-01   0.716 0.474208    
+native_countryLaos                          5.798e-01  1.005e+00   0.577 0.564064    
+native_countryMexico                       -4.400e-01  3.169e-01  -1.388 0.165030    
+native_countryNicaragua                    -4.031e-01  8.122e-01  -0.496 0.619736    
+`native_countryOutlying-US(Guam-USVI-etc)` -1.201e+01  3.192e+02  -0.038 0.969984    
+native_countryPeru                          1.245e-01  9.853e-01   0.126 0.899406    
+native_countryPhilippines                   1.149e-01  3.893e-01   0.295 0.767768    
+native_countryPoland                       -8.131e-02  5.051e-01  -0.161 0.872103    
+native_countryPortugal                      7.375e-01  7.006e-01   1.053 0.292540    
+`native_countryPuerto-Rico`                -2.654e-01  5.294e-01  -0.501 0.616197    
+native_countryScotland                     -1.191e-01  1.324e+00  -0.090 0.928330    
+native_countrySouth                        -9.229e-01  5.993e-01  -1.540 0.123602    
+native_countryTaiwan                       -3.944e-01  6.442e-01  -0.612 0.540311    
+native_countryThailand                      5.647e-01  1.094e+00   0.516 0.605613    
+`native_countryTrinadad&amp;Tobago`             1.334e+00  1.015e+00   1.315 0.188622    
+`native_countryUnited-States`               2.980e-01  1.727e-01   1.726 0.084390 .  
+native_countryVietnam                      -1.193e+00  7.250e-01  -1.646 0.099840 .  
+native_countryYugoslavia                    5.873e-01  7.480e-01   0.785 0.432370    </code></pre>
+<p> 위 모델에서는 다음과 같은 변수들이 유의해 보입니다.</p>
+<pre><code>                                           Estimate Std. Error z value Pr(&gt;|z|)    
+age                                       2.638e-02  2.061e-03  12.800  &lt; 2e-16 ***
+education_num                             3.005e-01  1.170e-02  25.688  &lt; 2e-16 ***
+marital_statusMarried-AF-spouse           2.545e+00  7.004e-01   3.633 0.000280 ***
+marital_statusMarried-civ-spouse          1.919e+00  3.555e-01   5.397 6.76e-08 ***
+marital_statusNever-married              -4.446e-01  1.130e-01  -3.933 8.39e-05 ***
+occupationProfessional                    7.114e-01  8.280e-02   8.592  &lt; 2e-16 ***
+occupationSales                           4.449e-01  7.837e-02   5.677 1.37e-08 ***
+occupationService                         2.924e-01  8.258e-02   3.541 0.000399 ***
+occupationWhite-Collar                    7.519e-01  6.506e-02  11.557  &lt; 2e-16 ***
+relationshipOwn-child                    -9.190e-01  3.508e-01  -2.620 0.008806 ** 
+relationshipWife                          1.339e+00  1.311e-01  10.211  &lt; 2e-16 ***
+raceWhite                                 5.699e-01  2.829e-01   2.015 0.043954 *  
+sexMale                                   9.897e-01  1.025e-01   9.659  &lt; 2e-16 ***
+capital_gain                              3.109e-04  1.312e-05  23.699  &lt; 2e-16 ***
+capital_loss                              7.023e-04  4.766e-05  14.735  &lt; 2e-16 ***
+hours_per_week                            2.987e-02  2.032e-03  14.700  &lt; 2e-16 ***
+native_countryColumbia                   -2.582e+00  1.129e+00  -2.287 0.022208 *  
+native_countryGreece                     -1.758e+00  8.158e-01  -2.155 0.031134 *  </code></pre>
+</div>
+<div id="모델-검증" class="section level2">
+<h2>모델 검증</h2>
+<p> 이제 우리가 만든 모델의 성능이 얼마나 되는지 알아보겠습니다. 이는 val_data의 목적변수의 값과 예측값을 서로 비교함으로써 가능합니다. 여기서 예측값을 계산할 때에는 predict() 함수를 사용하고, 이 함수의 type 인자값을 response로 지정합니다. 그러면 새로운 데이터에 대한 로지스틱 곡선의 함수값을 계산하여 결과적으로 목적변수가 1이 되는 확률값을 반환합니다.</p>
+<p> 관측값과 예측값을 각각 <code>y_obs</code>, <code>y_hat_logistic</code> 변수에 담습니다.</p>
+<pre class="r"><code>y_obs &lt;- ifelse(val_data$wage == &quot;&lt;=50K&quot;, 0, 1)
+
+# val_data를 predict() 함수에 넣기 전에 목적변수인wage를 제거합니다.. wage 변수를 예측하려는데 
+# wage 변수가 들어가 있는 데이터를 사용하면 안 되기 때문입니다.
+val_data %&gt;%
+  select(-wage) -&gt; val_data_1
+
+yhat_logistic &lt;- predict(adult_logistic_m, newdata = val_data_1, type = &#39;response&#39;)</code></pre>
+<div id="roc-curve" class="section level3">
+<h3>ROC Curve</h3>
+<p> ROCR 패키지에 있는 prediction() 함수와 performance() 함수를 이용해 prediction 및 performance 객체를 만듭니다. 만들어진 performance 객체에 담겨있는 정보들을 이용해 ROCR 그래프를 그리고 AUC를 추출할 수 있습니다.</p>
+<pre class="r"><code>pred_logistic &lt;- prediction(yhat_logistic, y_obs)
+perf_logistic &lt;- performance(pred_logistic, measure = &quot;tpr&quot;, x.measure = &quot;fpr&quot;)</code></pre>
+<pre class="r"><code>df_logistic &lt;- data.frame(FPR = perf_logistic@x.values[[1]], TPR = perf_logistic@y.values[[1]]) %&gt;%
+  as_tibble()
+
+df_logistic %&gt;% ggplot(aes(x = FPR, y = TPR)) + 
+  geom_line(color = &#39;blue&#39;) +
+  geom_segment(aes(x = 0, xend = 1, y = 0, yend = 1)) +
+  ggtitle(&#39;ROC Curve&#39;) + 
+  labs(x = &#39;False Positive Rate&#39;, y = &#39;True Positive Rate&#39;) +
+  theme_minimal() -&gt; p; p</code></pre>
+<p><img src="/post/2020-04-30-Logistic_Regression_Example_with_Adult_Dataset_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="auc" class="section level3">
+<h3>AUC</h3>
+<pre class="r"><code>performance(pred_logistic, &quot;auc&quot;)@y.values[[1]]</code></pre>
+<pre><code>## [1] 0.9011519</code></pre>
+<p> AUC는 약 0.9가 나왔습니다.</p>
+<p> 지금까지 validation data를 이용해 우리가 생성한 logistic regression 모델의 성능을 알아보았습니다. 보통은 cross validation 이라는 기법을 적용해 validaion data들에 대한 모델의 성능을 평가합니다. cross validation에 대해서는 별도의 post를 통해 자세히 설명할 예정입니다. 다만 간단히 개념적으로만 살펴보자면, 지금까지 한 것처럼 validation data 세트를 한 개만 만들지 말고 여러 개를 만들어 각각의 validation data들로 모델의 성능을 평가 후 그 성능을 평균하여 최종 모덜의 성능을 예측한다는 개념입니다.</p>
+<p> 좀 더 구체적으로 예를 들어보겠습니다. 지금처럼 데이터를 6:2:2 분리하여 진행하는 것이 아니라, 처음에는 8:2로분리하여 train data와 test_data를 분리하고 분리된 train data를 10개의 fold들로 나누어 9개는 훈련용 데이터로 사용하고 1개는 검증용 데이터로 사용하는데 이 때 10개로 나뉘어진 fold들의 순서를 순차적으로 바꾸어 훈련용 데이터와 검증용 데이터를 바꾸어줍니다. 총 10번의 반복된 모델 훈련과 검증을 통해 보다 객관적인 모델의 성능을 검증하는 방법이라고 할 수 있습니다.</p>
+<p><img src="../image/train_val_test.png" /></p>
+<p> 여기서 잠깐 생각해 보겠습니다. validation data와 test data와의 차이점은 무엇일까요? test data는 모델의 ‘최종 성능’ 을 평가하기 위해서 쓰입니다. 일종의 <code>최후의 보류</code>라고나 할까요? 우리의 지금 예에서는 logistic regression 하나의 알고리즘만을 사용했습니다. 하지만 보통은 여러 machine learning 알고리즘들을 같은 데이터에 적용해 최적의 알고리즘을 찾으려고 노력합니다. 이 때 각각의 다른 알고리즘으로 생성된 모델의 성능을 검증하는데 사용하는데 사용하는 data가 바로 validation data입니다.</p>
+<p> validation data와 test data와의 가장 큰 차이는 validation data는 모델 training의 과정에 관여하지만 test data는 그렇지 않다는 차이가 있습니다. 반면 validation data는 여러 모델 중에서 최종 모델을 선정하기 위한 성능 평가에 관여합니다. 따라서 validation data는 training과정에 관여하게 됩니다. 즉, validation data는 training 과정에 관여를 하며, training이 된 여러가지 모델 중 가장 좋은 하나의 모델을 고르기 위한 데이터입니다. test data는 모든 training 과정이 완료된 후에 최종적으로 모델의 성능을 평가하기 위한 데이터인 것입니다.</p>
+<p> 만약 test data가 모델을 개선하는데 쓰인다면, 그건 test data가 아니라 validation data입니다. test data가 이런식으로 모델 훈련 과정에 관여하게 된다면 test data에 대한 overfitting을 방지할 수도 없고 정확한 accuracy를 예측할 수도 없게 됩니다.</p>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

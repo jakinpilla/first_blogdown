@@ -1,3 +1,0 @@
-"0","yhat_logistic <- predict(adult_logistic_m, newdata = val_data_1, type = 'response')
-"
-"2","prediction from a rank-deficient fit may be misleading"
