@@ -349,8 +349,8 @@ performance(pred_logistic, "auc")@y.values[[1]]
 \ 지금까지 validation data를 이용해 우리가 생성한 logistic regression 모델의 성능을 알아보았습니다. 보통은 cross validation 이라는 기법을 적용해 validaion data들에 대한 모델의 성능을 평가합니다. cross validation에 대해서는 별도의 post를 통해 자세히 설명할 예정입니다. 다만 간단히 개념적으로만 살펴보자면, 지금까지 한 것처럼 validation data 세트를 한 개만 만들지 말고 여러 개를 만들어 각각의 validation data들로 모델의 성능을 평가 후 그 성능을 평균하여 최종 모덜의 성능을 예측한다는 개념입니다.
 
  \ 좀 더 구체적으로 예를 들어보겠습니다. 지금처럼 데이터를 6:2:2 분리하여 진행하는 것이 아니라, 처음에는 8:2로분리하여 train data와 test_data를 분리하고 분리된 train data를 10개의 fold들로 나누어 9개는 훈련용 데이터로 사용하고 1개는 검증용 데이터로 사용하는데 이 때 10개로 나뉘어진 fold들의 순서를 순차적으로 바꾸어 훈련용 데이터와 검증용 데이터를 바꾸어줍니다. 총 10번의 반복된 모델 훈련과 검증을 통해 보다 객관적인 모델의 성능을 검증하는 방법이라고 할 수 있습니다.
- 
-![](./../image/train_val_test.png)
+
+![](/post/2020-04-30-Logistic_Regression_Example_with_Adult_Dataset_files/train_val_test.png)
  
  \ 여기서 잠깐 생각해 보겠습니다. validation data와 test data와의 차이점은 무엇일까요? test data는 모델의 '최종 성능' 을 평가하기 위해서 쓰입니다. 일종의 `최후의 보류`라고나 할까요? 우리의 지금 예에서는 logistic regression 하나의 알고리즘만을 사용했습니다. 하지만 보통은 여러 machine learning 알고리즘들을 같은 데이터에 적용해 최적의 알고리즘을 찾으려고 노력합니다. 이 때 각각의 다른 알고리즘으로 생성된 모델의 성능을 검증하는데 사용하는데 사용하는 data가 바로 validation data입니다.
  
