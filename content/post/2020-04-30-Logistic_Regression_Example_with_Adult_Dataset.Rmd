@@ -298,7 +298,7 @@ native_countryColumbia                   -2.582e+00  1.129e+00  -2.287 0.022208 
 native_countryGreece                     -1.758e+00  8.158e-01  -2.155 0.031134 *  
 ```
 
-## 모델 검증
+## Model validation
 
 \ 이제 우리가 만든 모델의 성능이 얼마나 되는지 알아보겠습니다. 이는 val_data의 목적변수의 값과 예측값을 서로 비교함으로써 가능합니다. 여기서 예측값을 계산할 때에는 predict() 함수를 사용하고, 이 함수의 type 인자값을  response로 지정합니다. 그러면 새로운 데이터에 대한 로지스틱 곡선의 함수값을 계산하여 결과적으로 목적변수가 1이 되는 확률값을 반환합니다. 
 
@@ -357,6 +357,11 @@ performance(pred_logistic, "auc")@y.values[[1]]
  \ validation data와 test data와의 가장 큰 차이는 validation data는 모델 training의 과정에 관여하지만 test data는 그렇지 않다는 차이가 있습니다. 반면 validation data는 여러 모델 중에서 최종 모델을 선정하기 위한 성능 평가에 관여합니다. 따라서 validation data는 training과정에 관여하게 됩니다. 즉, validation data는 training 과정에 관여를 하며, training이 된 여러가지 모델 중 가장 좋은 하나의 모델을 고르기 위한 데이터입니다. test data는 모든 training 과정이 완료된 후에 최종적으로 모델의 성능을 평가하기 위한 데이터인 것입니다.
  
  \ 만약 test data가 모델을 개선하는데 쓰인다면, 그건 test data가 아니라 validation data입니다. test data가 이런식으로 모델 훈련 과정에 관여하게 된다면 test data에 대한 overfitting을 방지할 수도 없고 정확한 accuracy를 예측할 수도 없게 됩니다.
+ 
+## Prediction 
+
+ \ 이제 그 동안 꼬옥꼬옥 숨겨왔던 test data를 이용해 예측이란걸 해 보겠습니다.
+
  
  
 
