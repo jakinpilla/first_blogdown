@@ -1,6 +1,0 @@
-"0","vec_wage <- ifelse(adult$wage == ""<=50K"", 0, 1)"
-"0","cor(vec_wage, adult$capital_gain)"
-"1","[1]"
-"1"," 0.2233288"
-"1","
-"

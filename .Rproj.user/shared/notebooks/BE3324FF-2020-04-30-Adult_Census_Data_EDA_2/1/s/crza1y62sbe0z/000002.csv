@@ -1,3 +1,0 @@
-"0","ggpairs(df_tmp_1000_fctr_1[, c(1, 2)], mapping = aes(color = wage)) +"
-"0","  theme_minimal() +"
-"0","  theme(axis.text.x = element_text(angle = 45)) -> p_mat; p_mat"

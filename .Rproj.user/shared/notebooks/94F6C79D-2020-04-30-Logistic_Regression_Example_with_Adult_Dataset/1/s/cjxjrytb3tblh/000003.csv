@@ -1,5 +1,0 @@
-"0","train_data %>% "
-"0","  count(wage) %>%"
-"0","  ggplot(aes(wage, n, fill = wage)) + geom_bar(stat = 'identity') +"
-"0","  scale_fill_manual(values = c('steelblue', 'red'), aesthetics = 'fill') +"
-"0","  theme_minimal() "

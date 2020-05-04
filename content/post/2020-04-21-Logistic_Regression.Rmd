@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message=F, warning=F, cache=T, fig.width = 6, fig.height = 4)
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message=F, warning=F, fig.width = 6, fig.height = 4)
 ```
 
 
@@ -19,7 +19,7 @@ library(ggplot2)
 library(nlme)
 library(pastecs)
 library(reshape2)
-library(WRS)
+# library(WRS)
 library(clinfun)
 library(pgirmess)
 library(car)
