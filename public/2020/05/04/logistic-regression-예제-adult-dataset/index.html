@@ -1,13 +1,78 @@
----
-title: "Logistic Regression 예제: Adult Dataset"
-author: "Daniel Kim"
-date: "2020-05-04"
-output: 
-    html_document:
-      toc : true
-      toc_depth : 5
----
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.69.0" />
 
+
+<title>Logistic Regression 예제: Adult Dataset - My DataScience Blog</title>
+<meta property="og:title" content="Logistic Regression 예제: Adult Dataset - My DataScience Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">Daniel Kim</a></li>
+    
+    <li><a href="https://github.com/jakinpilla">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/jakinpilla">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">14 min read</span>
+    
+
+    <h1 class="article-title">Logistic Regression 예제: Adult Dataset</h1>
+
+    
+    <span class="article-date">2020-05-04</span>
+    
+
+    <div class="article-content">
+      
 <script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
 <script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
 <script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
@@ -476,3 +541,47 @@ table(yhat, yobs) %&gt;% confusionMatrix(positive = &quot;1&quot;) # 이 때 Pos
 <p>이며 이 값이 위의 출력에서 No Information Rate로 등장했던 것입니다. 분류 알고리즘 변수들을 활용하여 예측을 수행한 것이기 때문에 단순히 분류의 비율만 보고 결과를 출력하는 아주 원시적인 분류 알고리즘보다 성능이 좋아야만 합니다. 따라서 0.7592138은 모델을 만들었을 때 무조건 넘어야 하는 정확도라고 할 수 있습니다.</p>
 <p> confusion matrix의 모든 수치들을 정확히 이해하는 것은 쉬운 일이 아닙니다. 언젠가 이를 자세히 다룬 post를 올리도록 하겠습니다.</p>
 </div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

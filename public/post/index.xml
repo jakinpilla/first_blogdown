@@ -6,19 +6,19 @@
     <description>Recent content in Posts on My DataScience Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 03 May 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 04 May 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Logistic Regression 예제: Adult Dataset</title>
-      <link>/2020/05/03/logistic-regression-%EC%98%88%EC%A0%9C-adult-dataset/</link>
-      <pubDate>Sun, 03 May 2020 00:00:00 +0000</pubDate>
+      <link>/2020/05/04/logistic-regression-%EC%98%88%EC%A0%9C-adult-dataset/</link>
+      <pubDate>Mon, 04 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>/2020/05/03/logistic-regression-%EC%98%88%EC%A0%9C-adult-dataset/</guid>
+      <guid>/2020/05/04/logistic-regression-%EC%98%88%EC%A0%9C-adult-dataset/</guid>
       <description>Data Loading &amp;amp; SplitingData Loading 먼저 데이터를 불러오겠습니다. 지난 번 포스트에서 전처리한 데이터를 사용합니다. 그 데이터는 adult_1.csv 파일에 저장되어 있습니다.
-adult &amp;lt;- read_csv(&amp;#39;https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv&amp;#39;)# adult &amp;lt;- read_csv(&amp;#39;./data/adult_1.csv&amp;#39;)adult %&amp;gt;% glimpse()## Rows: 32,561## Columns: 13## $ age &amp;lt;dbl&amp;gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...## $ workclass &amp;lt;chr&amp;gt; &amp;quot;State-gov&amp;quot;, &amp;quot;Self-emp-not-inc&amp;quot;, &amp;quot;Private&amp;quot;, &amp;quot;Private.</description>
+adult &amp;lt;- read_csv(&amp;#39;https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv&amp;#39;)# adult &amp;lt;- read_csv(&amp;#39;./data/adult_1.csv&amp;#39;)adult %&amp;gt;% glimpse()## Observations: 32,561## Variables: 13## $ age &amp;lt;dbl&amp;gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...## $ workclass &amp;lt;chr&amp;gt; &amp;quot;State-gov&amp;quot;, &amp;quot;Self-emp-not-inc&amp;quot;, &amp;quot;Private&amp;quot;, &amp;quot;Private.</description>
     </item>
     
     <item>
