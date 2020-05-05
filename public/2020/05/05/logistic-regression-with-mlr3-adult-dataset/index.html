@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.69.0" />
+
+
+<title>Logistic Regression with mlr3: Adult Dataset - My DataScience Blog</title>
+<meta property="og:title" content="Logistic Regression with mlr3: Adult Dataset - My DataScience Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">Daniel Kim</a></li>
+    
+    <li><a href="https://github.com/jakinpilla">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/jakinpilla">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">6 min read</span>
+    
+
+    <h1 class="article-title">Logistic Regression with mlr3: Adult Dataset</h1>
+
+    
+    <span class="article-date">2020-05-05</span>
+    
+
+    <div class="article-content">
+      
+
+
+<pre class="r"><code>library(mlr3)
+library(mlr3learners)
+library(mlr3viz)
+library(mlr3misc)
+library(R6)
+library(data.table)
+library(tidyverse)</code></pre>
+<p> 이번 포스트에서는 mlr3라는 패키지를 통해 앞서 했었던 logistic regression을 반복해서 해 보려고 합니다. mlr3는 R6라는 객체지향 프로그래밍을 위한 R 패키지를 이용해 python의 scikit-learn 처럼 머신러닝을 할 수 있게 해 주는 현대적인 R 패키지입니다. 상당히 속도가 빠르고 통일된 학습 절차를 제공하고 있어 향후 R 언어의 ML을 위한 패키지로 각광받고 있습니다.</p>
+<div id="data-loading" class="section level2">
+<h2>Data Loading</h2>
+<p>일단 데이터를 불러옵니다.</p>
+<pre class="r"><code>adult &lt;- read_csv(&#39;https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv&#39;)</code></pre>
+<pre class="r"><code>adult %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 32,561
+## Variables: 13
+## $ age            &lt;dbl&gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, ...
+## $ workclass      &lt;chr&gt; &quot;State-gov&quot;, &quot;Self-emp-not-inc&quot;, &quot;Private&quot;, &quot;Private...
+## $ education_num  &lt;dbl&gt; 13, 13, 9, 7, 13, 14, 5, 9, 14, 13, 10, 13, 13, 12, ...
+## $ marital_status &lt;chr&gt; &quot;Never-married&quot;, &quot;Married-civ-spouse&quot;, &quot;Divorced&quot;, &quot;...
+## $ occupation     &lt;chr&gt; &quot;White-Collar&quot;, &quot;White-Collar&quot;, &quot;Blue-Collar&quot;, &quot;Blue...
+## $ relationship   &lt;chr&gt; &quot;Not-in-family&quot;, &quot;Husband&quot;, &quot;Not-in-family&quot;, &quot;Husban...
+## $ race           &lt;chr&gt; &quot;White&quot;, &quot;White&quot;, &quot;White&quot;, &quot;Black&quot;, &quot;Black&quot;, &quot;White&quot;...
+## $ sex            &lt;chr&gt; &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Female&quot;, &quot;Female&quot;, ...
+## $ capital_gain   &lt;dbl&gt; 2174, 0, 0, 0, 0, 0, 0, 0, 14084, 5178, 0, 0, 0, 0, ...
+## $ capital_loss   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+## $ hours_per_week &lt;dbl&gt; 40, 13, 40, 40, 40, 40, 16, 45, 50, 40, 80, 40, 30, ...
+## $ native_country &lt;chr&gt; &quot;United-States&quot;, &quot;United-States&quot;, &quot;United-States&quot;, &quot;...
+## $ wage           &lt;chr&gt; &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;, &quot;&lt;=50K&quot;...</code></pre>
+</div>
+<div id="task" class="section level2">
+<h2>Task</h2>
+<p>먼저 이용하는 데이터를 Task 객체에 등록해야 합니다.</p>
+<p>우리는 불러온 데이터에서 목적변수인 wage변수를 분류하는 Logistic Regression 모델을 만들려합니다. 분류에 대한 머신러닝 문제이므로 Classification Task를 사용합니다.</p>
+<p>이 때 target 목적변수는 현재 character 형인데 이를 factor형으로 변환시켜 주어야 합니다.</p>
+<pre class="r"><code>adult %&gt;%
+  mutate(wage = as.factor(wage)) -&gt; adult_1</code></pre>
+<pre class="r"><code>task = TaskClassif$new(id =  &quot;adult&quot;, backend = adult_1, target = &quot;wage&quot;, positive = &quot;&gt;50K&quot;)
+print(task)</code></pre>
+<pre><code>## &lt;TaskClassif:adult&gt; (32561 x 13)
+## * Target: wage
+## * Properties: twoclass
+## * Features (12):
+##   - chr (7): marital_status, native_country, occupation, race,
+##     relationship, sex, workclass
+##   - dbl (5): age, capital_gain, capital_loss, education_num,
+##     hours_per_week</code></pre>
+</div>
+<div id="learner" class="section level2">
+<h2>Learner</h2>
+<p>Logistic Regression에 대한 learner 객체를 불러옵니다.</p>
+<pre class="r"><code>learner = mlr_learners$get(&quot;classif.log_reg&quot;)
+print(learner)</code></pre>
+<pre><code>## &lt;LearnerClassifLogReg:classif.log_reg&gt;
+## * Model: -
+## * Parameters: list()
+## * Packages: stats
+## * Predict Type: response
+## * Feature types: logical, integer, numeric, character, factor, ordered
+## * Properties: twoclass, weights</code></pre>
+</div>
+<div id="data-split" class="section level2">
+<h2>Data Split</h2>
+<p>이번 포스트에서는 validation data는 별도로 분리하지 않겠습니다. 아직 mlr3가 익숙하지 않은 상태에서 validation data에 대한 것까지 다루는 것은 무리라고 생각해서 입니다. 또한 mlr3에서는 Cross Validation을 위한 훌륭한 방법을 제공하고 있으니 나중에는 그것을 학습하는 것이 좋습니다.</p>
+<p>데이터의 80%를 train data, 20%를 test data로 분리합니다.</p>
+<pre class="r"><code>train_set = sample(task$nrow, .8*task$nrow)
+test_set = sample(seq_len(task$nrow), train_set)</code></pre>
+<pre class="r"><code>train_set %&gt;% length()</code></pre>
+<pre><code>## [1] 26048</code></pre>
+<pre class="r"><code>test_set %&gt;% length()</code></pre>
+<pre><code>## [1] 30725</code></pre>
+</div>
+<div id="train" class="section level2">
+<h2>Train</h2>
+<p>train data를 이용해 모델을 학습합니다.(Scikit Learn의 fit method 같으시죠??^^)</p>
+<pre class="r"><code>learner$train(task, row_ids = train_set)</code></pre>
+<p>학습된 모델의 모습을 들여다보겠습니다.</p>
+<pre class="r"><code>learner$model</code></pre>
+<pre><code>## 
+## Call:  stats::glm(formula = task$formula(), family = &quot;binomial&quot;, data = task$data())
+## 
+## Coefficients:
+##                              (Intercept)  
+##                                9.9739425  
+##                                      age  
+##                               -0.0242948  
+##                             capital_gain  
+##                               -0.0003276  
+##                             capital_loss  
+##                               -0.0006940  
+##                            education_num  
+##                               -0.2865573  
+##                           hours_per_week  
+##                               -0.0301710  
+##          marital_statusMarried-AF-spouse  
+##                               -2.9108046  
+##         marital_statusMarried-civ-spouse  
+##                               -2.2691189  
+##      marital_statusMarried-spouse-absent  
+##                               -0.0094410  
+##              marital_statusNever-married  
+##                                0.4826388  
+##                  marital_statusSeparated  
+##                                0.1573928  
+##                    marital_statusWidowed  
+##                               -0.1158628  
+##                   native_countryCambodia  
+##                               -1.2546494  
+##                     native_countryCanada  
+##                               -0.5184026  
+##                      native_countryChina  
+##                                0.6509160  
+##                   native_countryColumbia  
+##                                1.7055702  
+##                       native_countryCuba  
+##                               -0.5379313  
+##         native_countryDominican-Republic  
+##                                1.3743755  
+##                    native_countryEcuador  
+##                               -0.1129964  
+##                native_countryEl-Salvador  
+##                                0.2886203  
+##                    native_countryEngland  
+##                               -0.3510947  
+##                     native_countryFrance  
+##                               -0.8507125  
+##                    native_countryGermany  
+##                               -0.7685458  
+##                     native_countryGreece  
+##                                0.7435920  
+##                  native_countryGuatemala  
+##                               11.7705367  
+##                      native_countryHaiti  
+##                               -0.2096967  
+##         native_countryHoland-Netherlands  
+##                               11.2843864  
+##                   native_countryHonduras  
+##                                0.8266197  
+##                       native_countryHong  
+##                               -0.2725317  
+##                    native_countryHungary  
+##                                0.0681672  
+##                      native_countryIndia  
+##                                0.0392959  
+##                       native_countryIran  
+##                               -0.3355071  
+##                    native_countryIreland  
+##                               -0.8024953  
+##                      native_countryItaly  
+##                               -0.8077557  
+##                    native_countryJamaica  
+##                                0.1041599  
+##                      native_countryJapan  
+##                               -0.3860885  
+##                       native_countryLaos  
+##                                0.4167141  
+##                     native_countryMexico  
+##                                0.5182762  
+##                  native_countryNicaragua  
+##                                0.4984564  
+## native_countryOutlying-US(Guam-USVI-etc)  
+##                               12.8340822  
+##                       native_countryPeru  
+##                                0.8939462  
+##                native_countryPhilippines  
+##                               -0.5279630  
+##                     native_countryPoland  
+##                               -0.0354581  
+##                   native_countryPortugal  
+##                               -0.4060680  
+##                native_countryPuerto-Rico  
+##                                0.2839621  
+##                   native_countryScotland  
+##                                0.5068775  
+##                      native_countrySouth  
+##                                1.1505927  
+##                     native_countryTaiwan  
+##                               -0.2865668  
+##                   native_countryThailand  
+##                               -0.0642656  
+##            native_countryTrinadad&amp;Tobago  
+##                                0.4340965  
+##              native_countryUnited-States  
+##                               -0.3796206  
+##                    native_countryVietnam  
+##                                1.3447871  
+##                 native_countryYugoslavia  
+##                               -0.3100930  
+##                  occupationOther/Unknown  
+##                                0.9310656  
+##                   occupationProfessional  
+##                               -0.7268770  
+##                          occupationSales  
+##                               -0.4377558  
+##                        occupationService  
+##                               -0.2281965  
+##                   occupationWhite-Collar  
+##                               -0.6971398  
+##                   raceAsian-Pac-Islander  
+##                               -0.8042962  
+##                                raceBlack  
+##                               -0.5137751  
+##                                raceOther  
+##                               -0.0966095  
+##                                raceWhite  
+##                               -0.7209703  
+##                relationshipNot-in-family  
+##                               -0.5510029  
+##               relationshipOther-relative  
+##                                0.5323961  
+##                    relationshipOwn-child  
+##                                0.8480688  
+##                    relationshipUnmarried  
+##                               -0.4472655  
+##                         relationshipWife  
+##                               -1.1022306  
+##                                  sexMale  
+##                               -0.9297373  
+##                     workclassFederal-gov  
+##                               -0.0824746  
+##                       workclassLocal-gov  
+##                                0.5563856  
+##                    workclassNever-worked  
+##                               11.2761780  
+##                         workclassPrivate  
+##                                0.3937831  
+##                    workclassSelf-emp-inc  
+##                                0.1798733  
+##                workclassSelf-emp-not-inc  
+##                                0.9160468  
+##                       workclassState-gov  
+##                                0.6374153  
+##                     workclassWithout-pay  
+##                               14.3678093  
+## 
+## Degrees of Freedom: 26047 Total (i.e. Null);  25972 Residual
+## Null Deviance:       28830 
+## Residual Deviance: 16780     AIC: 16930</code></pre>
+</div>
+<div id="prediction" class="section level2">
+<h2>prediction</h2>
+<pre class="r"><code>prediction = learner$predict(task, row_ids = test_set)
+prediction %&gt;% as.data.table() </code></pre>
+<pre><code>##        row_id truth response
+##     1:  23797 &lt;=50K    &lt;=50K
+##     2:  17220 &lt;=50K    &lt;=50K
+##     3:  18696  &gt;50K     &gt;50K
+##     4:  12996 &lt;=50K    &lt;=50K
+##     5:   5739 &lt;=50K    &lt;=50K
+##    ---                      
+## 30721:  23118 &lt;=50K    &lt;=50K
+## 30722:  27126 &lt;=50K     &gt;50K
+## 30723:  15256 &lt;=50K    &lt;=50K
+## 30724:  31888 &lt;=50K    &lt;=50K
+## 30725:  22299 &lt;=50K    &lt;=50K</code></pre>
+</div>
+<div id="confusion-matrix" class="section level2">
+<h2>Confusion Matrix</h2>
+<pre class="r"><code>prediction$confusion</code></pre>
+<pre><code>##         truth
+## response  &gt;50K &lt;=50K
+##    &gt;50K   4367  1593
+##    &lt;=50K  3029 21736</code></pre>
+</div>
+<div id="ploting-predictions" class="section level2">
+<h2>Ploting Predictions</h2>
+<pre class="r"><code>autoplot(prediction)</code></pre>
+<p><img src="/post/2020-05-05-Logistic_Regression_with_mlr3_and_Adult_dataset_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>x-axis의 truth는 test data의 실제 Positive와 Negative들의 값의 비율을 의미합니다.</p>
+<pre class="r"><code>prediction %&gt;%
+  as.data.table() %&gt;%
+  count(truth)</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   truth     n
+##   &lt;fct&gt; &lt;int&gt;
+## 1 &gt;50K   7396
+## 2 &lt;=50K 23329</code></pre>
+<p>x-axis의 response는 예측한 Positive와 Negative들의 값의 비율을 의미합니다.</p>
+<pre class="r"><code>prediction %&gt;%
+  as.data.table() %&gt;%
+  count(response)</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   response     n
+##   &lt;fct&gt;    &lt;int&gt;
+## 1 &gt;50K      5960
+## 2 &lt;=50K    24765</code></pre>
+</div>
+<div id="changing-the-predict-type" class="section level2">
+<h2>Changing the Predict Type</h2>
+<p>learner의 predict_type속성을 바꾸어 prediction의 type을 바꾸어줄 수 있습니다. 위에서는 예측을 1, 0으로 하는 binary result을 내놓았다면 이번에는 확률값을 출력하게 하겠습니다.</p>
+<pre class="r"><code>learner$predict_type = &quot;prob&quot;
+
+# re-fit the model
+learner$train(task, row_ids = train_set)
+
+# rebuild prediction object
+prediction = learner$predict(task, row_ids = test_set)</code></pre>
+<pre class="r"><code>prediction %&gt;% as.data.table()</code></pre>
+<pre><code>##        row_id truth response    prob.&gt;50K prob.&lt;=50K
+##     1:  23797 &lt;=50K    &lt;=50K 0.4333556227  0.5666444
+##     2:  17220 &lt;=50K    &lt;=50K 0.0046230832  0.9953769
+##     3:  18696  &gt;50K     &gt;50K 0.8147175099  0.1852825
+##     4:  12996 &lt;=50K    &lt;=50K 0.0008765346  0.9991235
+##     5:   5739 &lt;=50K    &lt;=50K 0.1514024364  0.8485976
+##    ---                                              
+## 30721:  23118 &lt;=50K    &lt;=50K 0.0759033213  0.9240967
+## 30722:  27126 &lt;=50K     &gt;50K 0.6883056608  0.3116943
+## 30723:  15256 &lt;=50K    &lt;=50K 0.0256735762  0.9743264
+## 30724:  31888 &lt;=50K    &lt;=50K 0.0938520216  0.9061480
+## 30725:  22299 &lt;=50K    &lt;=50K 0.0007486734  0.9992513</code></pre>
+<p>위에서 보듯이 각 데이터가 &gt;50K가 될 확률과 &lt;=50K가 될 확률들이 함께 출력되어져 나옵니다.</p>
+</div>
+<div id="roc-curve-and-auc" class="section level2">
+<h2>ROC Curve and AUC</h2>
+<p>ROC Curve는 autoplot() 함수의 type인자의 값을 roc로 두어 생성할 수 있습니다.</p>
+<pre class="r"><code>autoplot(prediction, type = &#39;roc&#39;)</code></pre>
+<p><img src="/post/2020-05-05-Logistic_Regression_with_mlr3_and_Adult_dataset_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>AUC는 다음과 같은 코드로 산출합니다.</p>
+<pre class="r"><code>measure = msr(&quot;classif.auc&quot;)
+prediction$score(measure)</code></pre>
+<pre><code>## classif.auc 
+##   0.9037565</code></pre>
+<p>만약 학습한 모델의 정확도를 알고싶으면 다음과 같이 하면 됩니다.</p>
+<pre class="r"><code>measure = msr(&quot;classif.acc&quot;)
+prediction$score(measure)</code></pre>
+<pre><code>## classif.acc 
+##   0.8495688</code></pre>
+<pre class="r"><code>mlr_measures</code></pre>
+<pre><code>## &lt;DictionaryMeasure&gt; with 51 stored values
+## Keys: classif.acc, classif.auc, classif.bacc, classif.ce,
+##   classif.costs, classif.dor, classif.fbeta, classif.fdr, classif.fn,
+##   classif.fnr, classif.fomr, classif.fp, classif.fpr, classif.logloss,
+##   classif.mcc, classif.npv, classif.ppv, classif.precision,
+##   classif.recall, classif.sensitivity, classif.specificity, classif.tn,
+##   classif.tnr, classif.tp, classif.tpr, debug, oob_error, regr.bias,
+##   regr.ktau, regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse,
+##   regr.mse, regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle,
+##   regr.rrse, regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho,
+##   regr.sse, selected_features, time_both, time_predict, time_train</code></pre>
+<p>그 밖에 학습한 모델의 알고싶은 평가정보가 있다면 위의 리스트들을 참고하여 위에서 했던 방법대로 진행하면 되겠습니다.</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

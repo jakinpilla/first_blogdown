@@ -6,10 +6,21 @@
     <description>Recent content in Posts on My DataScience Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 04 May 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 05 May 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Logistic Regression with mlr3: Adult Dataset</title>
+      <link>/2020/05/05/logistic-regression-with-mlr3-adult-dataset/</link>
+      <pubDate>Tue, 05 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/05/05/logistic-regression-with-mlr3-adult-dataset/</guid>
+      <description>library(mlr3)library(mlr3learners)library(mlr3viz)library(mlr3misc)library(R6)library(data.table)library(tidyverse) 이번 포스트에서는 mlr3라는 패키지를 통해 앞서 했었던 logistic regression을 반복해서 해 보려고 합니다. mlr3는 R6라는 객체지향 프로그래밍을 위한 R 패키지를 이용해 python의 scikit-learn 처럼 머신러닝을 할 수 있게 해 주는 현대적인 R 패키지입니다. 상당히 속도가 빠르고 통일된 학습 절차를 제공하고 있어 향후 R 언어의 ML을 위한 패키지로 각광받고 있습니다.
+Data Loading일단 데이터를 불러옵니다.
+adult &amp;lt;- read_csv(&amp;#39;https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv&amp;#39;)adult %&amp;gt;% glimpse()## Observations: 32,561## Variables: 13## $ age &amp;lt;dbl&amp;gt; 39, 50, 38, 53, 28, 37, 49, 52, 31, 42, 37, 30, 23, .</description>
+    </item>
     
     <item>
       <title>Logistic Regression 예제: Adult Dataset</title>

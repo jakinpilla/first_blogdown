@@ -3,12 +3,17 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/2020/05/04/logistic-regression-%EC%98%88%EC%A0%9C-adult-dataset/</loc>
-    <lastmod>2020-05-04T00:00:00+00:00</lastmod>
+    <loc>/2020/05/05/logistic-regression-with-mlr3-adult-dataset/</loc>
+    <lastmod>2020-05-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/post/</loc>
+    <lastmod>2020-05-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2020/05/04/logistic-regression-%EC%98%88%EC%A0%9C-adult-dataset/</loc>
     <lastmod>2020-05-04T00:00:00+00:00</lastmod>
   </url>
   

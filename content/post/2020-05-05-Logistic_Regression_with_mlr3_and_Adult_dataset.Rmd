@@ -1,0 +1,177 @@
+---
+title: "Logistic Regression with mlr3: Adult Dataset"
+author: "Daniel Kim"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output: 
+    html_document:
+      toc : true
+      toc_depth : 5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message=F, warning=F)
+```
+
+
+```{r message = FALSE, warning = FALSE}
+library(mlr3)
+library(mlr3learners)
+library(mlr3viz)
+library(mlr3misc)
+library(R6)
+library(data.table)
+library(tidyverse)
+```
+
+\ 이번 포스트에서는 mlr3라는 패키지를 통해 앞서 했었던 logistic regression을 반복해서 해 보려고 합니다. mlr3는 R6라는 객체지향 프로그래밍을 위한 R 패키지를 이용해 python의 scikit-learn 처럼 머신러닝을 할 수 있게 해 주는 현대적인 R 패키지입니다. 상당히 속도가 빠르고 통일된 학습 절차를 제공하고 있어 향후 R 언어의 ML을 위한 패키지로 각광받고 있습니다.
+
+## Data Loading
+
+일단 데이터를 불러옵니다.
+```{r}
+adult <- read_csv('https://raw.githubusercontent.com/jakinpilla/first_blogdown/master/public/post/data/adult_1.csv')
+```
+
+```{r}
+adult %>% glimpse()
+```
+
+## Task
+
+먼저 이용하는 데이터를 Task 객체에 등록해야 합니다.
+
+우리는 불러온 데이터에서 목적변수인 wage변수를 분류하는 Logistic Regression 모델을 만들려합니다. 분류에 대한 머신러닝 문제이므로 Classification Task를 사용합니다. 
+
+이 때 target 목적변수는 현재 character 형인데 이를 factor형으로 변환시켜 주어야 합니다.
+
+```{r}
+adult %>%
+  mutate(wage = as.factor(wage)) -> adult_1
+```
+
+```{r}
+task = TaskClassif$new(id =  "adult", backend = adult_1, target = "wage", positive = ">50K")
+print(task)
+```
+
+## Learner
+
+Logistic Regression에 대한 learner 객체를 불러옵니다.
+
+```{r}
+learner = mlr_learners$get("classif.log_reg")
+print(learner)
+```
+
+## Data Split
+
+이번 포스트에서는 validation data는 별도로 분리하지 않겠습니다. 아직 mlr3가 익숙하지 않은 상태에서 validation data에 대한 것까지 다루는 것은 무리라고 생각해서 입니다. 또한 mlr3에서는 Cross Validation을 위한 훌륭한 방법을 제공하고 있으니 나중에는 그것을 학습하는 것이 좋습니다.
+
+데이터의 80%를 train data, 20%를 test data로 분리합니다.
+
+```{r}
+train_set = sample(task$nrow, .8*task$nrow)
+test_set = sample(seq_len(task$nrow), train_set)
+```
+
+```{r}
+train_set %>% length()
+test_set %>% length()
+```
+
+## Train
+
+train data를 이용해 모델을 학습합니다.(Scikit Learn의 fit method 같으시죠??^^)
+```{r}
+learner$train(task, row_ids = train_set)
+```
+
+학습된 모델의 모습을 들여다보겠습니다.
+
+```{r}
+learner$model
+```
+
+## prediction
+
+```{r}
+prediction = learner$predict(task, row_ids = test_set)
+prediction %>% as.data.table() 
+```
+
+## Confusion Matrix
+
+```{r}
+prediction$confusion
+```
+
+## Ploting  Predictions
+
+```{r}
+autoplot(prediction)
+```
+
+x-axis의  truth는 test data의 실제 Positive와  Negative들의 값의 비율을 의미합니다.
+
+```{r}
+prediction %>%
+  as.data.table() %>%
+  count(truth)
+```
+
+x-axis의 response는 예측한 Positive와 Negative들의 값의 비율을 의미합니다.
+
+```{r}
+prediction %>%
+  as.data.table() %>%
+  count(response)
+```
+
+## Changing  the Predict Type
+
+learner의 predict_type속성을 바꾸어 prediction의 type을 바꾸어줄 수 있습니다. 위에서는 예측을 1, 0으로 하는 binary result을 내놓았다면 이번에는 확률값을 출력하게 하겠습니다.
+
+```{r}
+learner$predict_type = "prob"
+
+# re-fit the model
+learner$train(task, row_ids = train_set)
+
+# rebuild prediction object
+prediction = learner$predict(task, row_ids = test_set)
+```
+
+```{r}
+prediction %>% as.data.table()
+```
+
+위에서 보듯이 각 데이터가 >50K가 될 확률과 <=50K가 될 확률들이 함께 출력되어져 나옵니다.
+
+## ROC Curve  and AUC
+
+ROC Curve는 autoplot() 함수의 type인자의 값을 roc로 두어 생성할 수 있습니다.
+
+```{r}
+autoplot(prediction, type = 'roc')
+```
+
+AUC는 다음과 같은 코드로 산출합니다. 
+
+```{r}
+measure = msr("classif.auc")
+prediction$score(measure)
+```
+
+만약 학습한 모델의 정확도를 알고싶으면 다음과 같이 하면 됩니다.
+
+```{r}
+measure = msr("classif.acc")
+prediction$score(measure)
+```
+
+```{r}
+mlr_measures
+```
+
+그 밖에 학습한 모델의 알고싶은 평가정보가 있다면 위의 리스트들을 참고하여 위에서 했던 방법대로 진행하면 되겠습니다.
+
