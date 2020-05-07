@@ -62,7 +62,7 @@
 
   <article class="article">
     
-    <span class="article-duration">3 min read</span>
+    <span class="article-duration">4 min read</span>
     
 
     <h1 class="article-title">Support Vector Machine: Theory</h1>
@@ -148,6 +148,7 @@ linear_plot_with_theta_delta(1, .1) +
 <p><img src="/post/2020-05-07-Support_Vector_Machine_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>빨간선의 경우 그림에서처럼 4개의 보라색 원으로 감싸여진 데이터가 매우 Decision Boundary와 가까워집니다. 데이터라는 것은 언제나 특정 시점의 관측자에 의해 측정되어진 것이기에 그 값은 측정 시점과 관측자의 상태에 따라 변동이 생깁니다. 만약 위의 보라색 원 안에 있는 데이터들이 상하좌우로 이동을 하게 된다면 어떨까요? 어떤 경우는 Decision Boundary를 넘어가 Positive를 Negative로 혹은 Negative를 Positive로 잘못 분류하는 경우가 발생합니다. 즉, 빨간선을 Decision Boundary로 가지는 분류모델은 초록선을 Decision Boundary로 가지는 분류모델에 비해 불안한 나쁜 모델이라고 할 수 있습니다. 즉 우리의 직관이 맞는 겁니다.</p>
 <p>그런데 어떻게 이 초록색 Decision Boundary를 잘 찾을 수 있을까요? 어떻게 이 Decision Boundary를 계산할 수 있을까요?</p>
+<p>여기서 잠깐 한 직선과 여러 점들사이의 거리를 계산하는 문제를 생각해보겠습니다.</p>
 <pre class="r"><code># the line&#39;s slope and intercept information
 slope &lt;- .8
 intercept &lt;- .1
