@@ -136,5 +136,4 @@ ggplot(data = df_1, aes(x1, x2, color = y)) +
   theme_minimal()
 ```
 
-
-
+netlify deploy가 불안정합니다.
