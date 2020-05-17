@@ -136,4 +136,4 @@ ggplot(data = df_1, aes(x1, x2, color = y)) +
   theme_minimal()
 ```
 
-netlify deploy가 불안정합니다. 왜 이렇게 반영이 안되는걸까? public 폴더에 해당 일자의 index.html이 있는 폴더를 지우고 post 폴더의 html 파일을 지웠다. 그리고 serv_site 실행
+n
