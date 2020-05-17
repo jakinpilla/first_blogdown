@@ -1,15 +1,19 @@
 ---
-title: "Support Vector Machine: Theory"
-author: "Daniel Kim"
-date: "`r format(Sys.time(), '%Y-%m-%d')`"
-output: 
-    html_document:
-      toc : true
-      toc_depth : 5
+title: SVM theory Part1
+author: Daniel Kim
+date: '2020-05-18'
+slug: svm-theory-part1
+categories: []
+tags:
+  - ML
+  - SVM
+  - R
 ---
 
+
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message=F, warning=F)
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message=F, warning=F, cache = F)
 ```
 
 
