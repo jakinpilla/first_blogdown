@@ -22,6 +22,15 @@
     </item>
     
     <item>
+      <title>Test</title>
+      <link>/2020/05/18/test/</link>
+      <pubDate>Mon, 18 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/05/18/test/</guid>
+      <description>Just Test of New Post</description>
+    </item>
+    
+    <item>
       <title>Logistic Regression with mlr3: Adult Dataset</title>
       <link>/2020/05/05/logistic-regression-with-mlr3-adult-dataset/</link>
       <pubDate>Tue, 05 May 2020 00:00:00 +0000</pubDate>
