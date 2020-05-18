@@ -106,12 +106,12 @@ linear_plot_with_theta_delta(1, .1) +
 
 그런데 어떻게 이 초록색 Decision Boundary를 잘 찾을 수 있을까요? 어떻게 이 Decision Boundary를 계산할 수 있을까요?
 
-여기서 잠깐 한 직선과 여러 점들사이의 거리를 계산하는 문제를 생각해보겠습니다.
+여기서 잠깐 한 Decision Boundary와  데이터들사이의 거리를 계산하는 문제를 생각해보겠습니다. 데이터에서 Decision Boudary로 수선의 발을 내려 그 거리를 재는 것입니다. 
 
 ```{r, fig.width = 7, fig.height = 7}
 # the line's slope and intercept information
-slope <- .8
-intercept <- .1
+slope <- 1
+intercept <- 0
 
 perp.segment.coord <- function(x1, x2, intercept, slope){
   # finds endpoint for a perpendicular segment from the point (x1,x2) to the line
@@ -137,7 +137,67 @@ ggplot(data = df_1, aes(x1, x2, color = y)) +
   geom_segment(data = perp.segment_2,
                aes(x = x1, y= x2, xend = xp1, yend = xp2), 
                lty = 'dashed') +
-  theme_minimal()
+  theme_minimal() -> p; p
 ```
 
-blogdown...
+y가 0이고 가장 가까운 거리를 가지는 점을 찾아보겠습니다. 
+
+```{r, fig.width = 7, fig.height = 7}
+perp.segment_2 %>%
+  mutate(x_diff = xp1 - x1) %>%
+  mutate(y_diff = xp2 - x2) %>%
+  mutate(dist_sq = x_diff^2 + y_diff^2) %>%
+  mutate(dist_ucl = sqrt(dist_sq)) %>%
+  arrange(dist_sq) -> df_with_dist
+
+df_with_dist %>%
+  filter(y == 0) %>%
+  arrange(dist_sq) %>%
+  slice(1) %>%
+  select(x1, x2) -> df_tmp
+
+p + geom_point(data= df_tmp, 
+               aes(x1, x2), size = 7, alpha = .5, color = 'purple')
+
+```
+
+바로 이 점을 지나고 Decisions Boudary와 평행한 직선을 그어보겠습니다. 이는 기울기가 1이고 
+
+```{r}
+df_tmp
+```
+
+`x1 = 0.3942258`, `x2 = 0.2882747` 인 점을 지나는 직선을 찾는 문제가 됩니다.
+
+```
+0.2882747 = 0.3942258 * 1 + intercept
+```
+위의 식에서 intercept를 구하면 됩니다.
+
+```{r}
+0.2882747 - 0.3942258
+```
+
+즉, `intercept`는 `-0.1059511` 입니다. 시각화해보겠습니다.
+
+```{r, fig.width = 7, fig.height = 7}
+ p_1 <- p + 
+  geom_point(data= df_tmp, aes(x1, x2), size = 7, alpha = .5, color = 'purple') + 
+  geom_abline(intercept = -0.1059511, slope = 1, color = 'purple', size = 1, linetype = 'dashed'); p_1
+```
+
+
+```{r, fig.width = 7, fig.height = 7}
+df_with_dist %>%
+  filter(y == 1) %>%
+  arrange(dist_sq) %>%
+  slice(1) %>%
+  select(x1, x2) -> df_tmp
+
+intercept <- 0.6510358 - 0.5467153
+
+p_1 + geom_point(data= df_tmp, 
+               aes(x1, x2), size = 7, alpha = .5, color = 'purple') +
+   geom_abline(intercept = intercept, slope = 1, color = 'purple', size = 1, linetype = 'dashed')
+```
+

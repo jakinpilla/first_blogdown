@@ -85,10 +85,10 @@ linear_plot_with_theta_delta(1, .1) +
 <p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>빨간선의 경우 그림에서처럼 4개의 보라색 원으로 감싸여진 데이터가 매우 Decision Boundary와 가까워집니다. 데이터라는 것은 언제나 특정 시점의 관측자에 의해 측정되어진 것이기에 그 값은 측정 시점과 관측자의 상태에 따라 변동이 생깁니다. 만약 위의 보라색 원 안에 있는 데이터들이 상하좌우로 이동을 하게 된다면 어떨까요? 어떤 경우는 Decision Boundary를 넘어가 Positive를 Negative로 혹은 Negative를 Positive로 잘못 분류하는 경우가 발생합니다. 즉, 빨간선을 Decision Boundary로 가지는 분류모델은 초록선을 Decision Boundary로 가지는 분류모델에 비해 불안한 나쁜 모델이라고 할 수 있습니다. 즉 우리의 직관이 맞는 겁니다.</p>
 <p>그런데 어떻게 이 초록색 Decision Boundary를 잘 찾을 수 있을까요? 어떻게 이 Decision Boundary를 계산할 수 있을까요?</p>
-<p>여기서 잠깐 한 직선과 여러 점들사이의 거리를 계산하는 문제를 생각해보겠습니다.</p>
+<p>여기서 잠깐 한 Decision Boundary와 데이터들사이의 거리를 계산하는 문제를 생각해보겠습니다. 데이터에서 Decision Boudary로 수선의 발을 내려 그 거리를 재는 것입니다.</p>
 <pre class="r"><code># the line&#39;s slope and intercept information
-slope &lt;- .8
-intercept &lt;- .1
+slope &lt;- 1
+intercept &lt;- 0
 
 perp.segment.coord &lt;- function(x1, x2, intercept, slope){
   # finds endpoint for a perpendicular segment from the point (x1,x2) to the line
@@ -114,6 +114,48 @@ ggplot(data = df_1, aes(x1, x2, color = y)) +
   geom_segment(data = perp.segment_2,
                aes(x = x1, y= x2, xend = xp1, yend = xp2), 
                lty = &#39;dashed&#39;) +
-  theme_minimal()</code></pre>
+  theme_minimal() -&gt; p; p</code></pre>
 <p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>blogdown…</p>
+<p>y가 0이고 가장 가까운 거리를 가지는 점을 찾아보겠습니다.</p>
+<pre class="r"><code>perp.segment_2 %&gt;%
+  mutate(x_diff = xp1 - x1) %&gt;%
+  mutate(y_diff = xp2 - x2) %&gt;%
+  mutate(dist_sq = x_diff^2 + y_diff^2) %&gt;%
+  mutate(dist_ucl = sqrt(dist_sq)) %&gt;%
+  arrange(dist_sq) -&gt; df_with_dist
+
+df_with_dist %&gt;%
+  filter(y == 0) %&gt;%
+  arrange(dist_sq) %&gt;%
+  slice(1) %&gt;%
+  select(x1, x2) -&gt; df_tmp
+
+p + geom_point(data= df_tmp, 
+               aes(x1, x2), size = 7, alpha = .5, color = &#39;purple&#39;)</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>바로 이 점을 지나고 Decisions Boudary와 평행한 직선을 그어보겠습니다. 이는 기울기가 1이고</p>
+<pre class="r"><code>df_tmp</code></pre>
+<pre><code>##          x1        x2
+## 1 0.3942258 0.2882747</code></pre>
+<p><code>x1 = 0.3942258</code>, <code>x2 = 0.2882747</code> 인 점을 지나는 직선을 찾는 문제가 됩니다.</p>
+<pre><code>0.2882747 = 0.3942258 * 1 + intercept</code></pre>
+<p>위의 식에서 intercept를 구하면 됩니다.</p>
+<pre class="r"><code>0.2882747 - 0.3942258</code></pre>
+<pre><code>## [1] -0.1059511</code></pre>
+<p>즉, <code>intercept</code>는 <code>-0.1059511</code> 입니다. 시각화해보겠습니다.</p>
+<pre class="r"><code> p_1 &lt;- p + 
+  geom_point(data= df_tmp, aes(x1, x2), size = 7, alpha = .5, color = &#39;purple&#39;) + 
+  geom_abline(intercept = -0.1059511, slope = 1, color = &#39;purple&#39;, size = 1, linetype = &#39;dashed&#39;); p_1</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df_with_dist %&gt;%
+  filter(y == 1) %&gt;%
+  arrange(dist_sq) %&gt;%
+  slice(1) %&gt;%
+  select(x1, x2) -&gt; df_tmp
+
+intercept &lt;- 0.6510358 - 0.5467153
+
+p_1 + geom_point(data= df_tmp, 
+               aes(x1, x2), size = 7, alpha = .5, color = &#39;purple&#39;) +
+   geom_abline(intercept = intercept, slope = 1, color = &#39;purple&#39;, size = 1, linetype = &#39;dashed&#39;)</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
