@@ -1,13 +1,78 @@
----
-title: "로지스틱 회귀(Logistic Regression)의 기본 원리"
-author: "Daniel Kim"
-date: "2020-05-18"
-output: 
-    html_document:
-      toc : true
-      toc_depth : 5
----
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.69.0" />
 
+
+<title>로지스틱 회귀(Logistic Regression)의 기본 원리 - My DataScience Blog</title>
+<meta property="og:title" content="로지스틱 회귀(Logistic Regression)의 기본 원리 - My DataScience Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">Daniel Kim</a></li>
+    
+    <li><a href="https://github.com/jakinpilla">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/jakinpilla">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">8 min read</span>
+    
+
+    <h1 class="article-title">로지스틱 회귀(Logistic Regression)의 기본 원리</h1>
+
+    
+    <span class="article-date">2020-05-18</span>
+    
+
+    <div class="article-content">
+      
 <script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
 <script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
 <script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
@@ -78,3 +143,47 @@ ggplot(data.frame(x= c(0, 1)), aes(x=x)) +
 <li>(요약정리) 선형회귀의 모형이 타당하려면, 해당 관측 자료에 선형 관계가 존재해야 한다. 그런데 결과변수가 범주형이면 그러한 가정이 깨진다. 로짓변환은 비선형 관계를 선형 관계로 표현하는 한 방법이다. 로지스틱 회귀 방정식은 바로 그러한 원리에 기초한다. 즉, 다중 선형 관계를 로그 항(logit)들로 표현함으로써 선형성 가정 위반 문제를 극복한다.</li>
 </ul>
 </div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
