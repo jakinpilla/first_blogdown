@@ -159,3 +159,109 @@ p_1 + geom_point(data= df_tmp,
                aes(x1, x2), size = 7, alpha = .5, color = &#39;purple&#39;) +
    geom_abline(intercept = intercept, slope = 1, color = &#39;purple&#39;, size = 1, linetype = &#39;dashed&#39;)</code></pre>
 <p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>다시 원점으로 돌아가겠습니다. 데이터를 생성합니다.</p>
+<pre class="r"><code># set seed
+set.seed(2020)
+n &lt;- 50  
+df &lt;- data.frame(x1 = runif(n), x2 = runif(n))
+  
+# Generate data frame with two uniformly distributed predictors lying between 0 and 1.
+# classify data points depending on location
+df$y &lt;- factor(ifelse(df$x2 - 1*df$x1 &lt; 0, 0, 1), 
+                 levels = c(0, 1))
+  
+  # retain only those points that lie outside the margin
+df_1 &lt;- df[abs(1*df$x1 - df$x2) &gt; .1, ]</code></pre>
+<p>생성된 데이터를 시각화합니다.</p>
+<pre class="r"><code>df_1 %&gt;%
+  ggplot(aes(x1, x2, color = y)) + geom_point() +
+  scale_color_manual(values = c(&quot;red&quot;, &quot;blue&quot;)) + 
+  xlim(0, 1) +
+  ylim(0, 1) +
+  theme_minimal() -&gt; p; p</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>위의 데이터를 분류하는 Decision Boundary를 찾아보는 문제를 생각해보겠습니다. 두 데이터를 분류하는 Decision Boundary의 종류는 일단 무수히 많아 보입니다. 우리의 목표는 최적의 Decision Boundary를 찾는 것입니다.</p>
+<pre class="r"><code>df_with_dist %&gt;%
+  arrange(dist_sq) %&gt;% head(3) -&gt; df_tmp
+
+p +
+  geom_point(data = df_tmp, aes(x1, x2),  size = 7, alpha = .5, color = &#39;purple&#39;) -&gt; p_1; p_1</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>우리는 위의 논의 과정을 통해 위의 세 점을 이용해 Decision Boundary를 찾을 수 있음을 알 수 있습니다. 먼저 빨간점 2개를 지나는 직선을 그어보겠습니다.</p>
+<pre class="r"><code>df_tmp %&gt;% 
+  filter(y==0) %&gt;%
+  select(x1, x2) -&gt; df_tmp_1
+
+delta_x &lt;- df_tmp_1[2, 1] - df_tmp_1[1, 1]
+delta_y &lt;- df_tmp_1[2, 2] - df_tmp_1[1, 2]
+slope &lt;- delta_y / delta_x
+intercept_1 &lt;-  df_tmp_1[1, 2] - slope*df_tmp_1[1, 1]
+
+p_1 +
+  geom_abline(slope = slope, intercept = intercept_1, linetype = &#39;dashed&#39;) -&gt; p_2; p_2</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>다음으로는 위의 선의 기울기가 같고 파란점을 지나는 직선을 그어 보겠습니다.</p>
+<pre class="r"><code>df_tmp %&gt;% 
+  filter(y==1) %&gt;%
+  select(x1, x2) -&gt; df_tmp_2
+
+intercept_2 &lt;- df_tmp_2[1, 2] - slope*df_tmp_2[1, 1]
+
+p_2 +
+  geom_abline(slope = slope, intercept = intercept_2, linetype = &#39;dashed&#39;) -&gt; p_3; p_3</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>이제 이 두 직선의 중간을 지나는 선을 그어보겠습니다. 먼저 파란색 점에서 두 빨간색 점을 지나는 직선에
+수선의 발을 내려 수선의 길이를 잽니다.</p>
+<pre class="r"><code># the line&#39;s slope and intercept information
+slope </code></pre>
+<pre><code>## [1] 0.9889077</code></pre>
+<pre class="r"><code>intercept_1</code></pre>
+<pre><code>## [1] -0.1015782</code></pre>
+<pre class="r"><code>perp.segment.coord &lt;- function(x1, x2, intercept, slope){
+  # finds endpoint for a perpendicular segment from the point (x1,x2) to the line
+  # defined by ortho as y = a*x + b
+  a &lt;- slope  # slope
+  b &lt;- intercept  # intercept
+  xp1 &lt;- (x1 + a*x2 - a*b)/(1 + a^2)
+  xp2 &lt;- b + a*xp1
+  list(x1=x1, x2=x2, xp1=xp1, xp2=xp2)
+}
+
+perp.segment &lt;- perp.segment.coord(df_tmp_2$x1, df_tmp_2$x2, intercept_1, slope = slope)
+perp.segment_1 &lt;- perp.segment %&gt;% as.data.frame()</code></pre>
+<pre class="r"><code>perp.segment_1 %&gt;%
+  mutate(y = 1) -&gt; perp.segment_2
+
+p_3 +
+  geom_segment(data = perp.segment_2,
+               aes(x = x1, y= x2, xend = xp1, yend = xp2), 
+               linetype = &#39;dashed&#39;, color = &#39;red&#39;,
+               inherit.aes = F) +
+  theme_minimal() -&gt; p_4; p_4</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>수선의 길이는 다음과 같습니다.</p>
+<pre class="r"><code>perp.segment_2 %&gt;%
+  mutate(x_diff = xp1 - x1) %&gt;%
+  mutate(y_diff = xp2 - x2) %&gt;%
+  mutate(dist_sq = x_diff^2 + y_diff^2) %&gt;%
+  mutate(dist_ucl = sqrt(dist_sq)) %&gt;%
+  arrange(dist_sq) -&gt; df_with_dist_1
+
+df_with_dist_1$dist_ucl</code></pre>
+<pre><code>## [1] 0.1507141</code></pre>
+<p>이 수선의 발의 중간지점에 대한 좌표를 구하고 이 좌표를 지나면서 두 점선에 평행한 선을 찾아보겠습니다.</p>
+<pre class="r"><code>x_middle &lt;- (df_with_dist_1$x1 + df_with_dist_1$xp1)/2
+y_middle &lt;- (df_with_dist_1$x2 + df_with_dist_1$xp2)/2
+
+intercept_3 &lt;- y_middle - slope*x_middle
+
+p_4 +
+  geom_point(aes(x = x_middle, y = y_middle), size = 3, color = &#39;black&#39;) +
+  geom_abline(slope = slope, intercept = intercept_3) -&gt; p_5; p_5</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>마진의 수선의 발의 길이의 반입니다.</p>
+<pre class="r"><code>margin &lt;- df_with_dist_1$dist_ucl / 2; margin</code></pre>
+<pre><code>## [1] 0.07535703</code></pre>
+<pre class="r"><code>p_5 + 
+  annotate(&quot;text&quot;, x = x_middle + .15, y = y_middle - .02, label = &quot;margin = 0.0754&quot;)</code></pre>
+<p><img src="/post/2020-05-18-svm-theory-part1_files/figure-html/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
