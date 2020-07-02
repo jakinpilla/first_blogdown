@@ -6,10 +6,22 @@
     <description>Recent content in Posts on My DataScience Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 23 Jun 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 02 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Ubuntu CD/DVD 인식 방법</title>
+      <link>/2020/07/02/ubuntu-cd-dvd-%EC%9D%B8%EC%8B%9D-%EB%B0%A9%EB%B2%95/</link>
+      <pubDate>Thu, 02 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/07/02/ubuntu-cd-dvd-%EC%9D%B8%EC%8B%9D-%EB%B0%A9%EB%B2%95/</guid>
+      <description>리눅스는 인식한 장치를 /dev 하위에 파일로 만들어 관리하는데 cdrom의 경우 /dev/cdrom으로 인식됩니다.
+ls /dev/cdrom 보통 CD/DVD 미디어 장치는 /media/cdrom 에 마운트 시켜줍니다. 그런데 처음 CD/DVD를 우분투에서 마운트 시킬때 이와같은 경로가 없어 cd /media로 이동 후 mkdir cdrom 명령어를 통해 최종 /media/cdrom 경로의 디렉토리를 미리 만들어 주어야 합니다.
+mount 명령어를 통해 장치를 원하는 경로에 마운트 시켜줍니다.
+mount &amp;lt;장치경로&amp;gt; &amp;lt;마운트 시킬 경로&amp;gt; mount /dev/cdrom /media/cdrom 이렇게 하며 CD/DVD를 인식하게 되어 사용할 수 있게 됩니다.</description>
+    </item>
     
     <item>
       <title>ubuntu rstudio 한글입력문제 해결하는 방법</title>
